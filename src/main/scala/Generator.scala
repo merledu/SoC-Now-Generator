@@ -18,11 +18,11 @@ import jigsaw.peripherals.i2c._
 import ccache.caches.DMCache
 
 class SoCNow(programFile: Option[String],
-                 configs:Map[Any, Map[Any, Any]]) extends Module {
+                 configs:Map[Any, Map[Any, Any]]) extends MultiIOModule {
 
     val n = configs("GPIO")("n").asInstanceOf[Int]
 
-    val io = IO(new GeneratorIOs(configs = configs, fpga = true))
+    // val io = IO(new GeneratorIOs(configs = configs, fpga = true))
 
     val gen = Module(new Generator(programFile, configs))
     val pll = Module(new PLL_8MHz())
@@ -31,90 +31,108 @@ class SoCNow(programFile: Option[String],
     gen.clock := pll.io.clk_out1
 
     if(configs("GPIO")("is").asInstanceOf[Boolean]){
+      val gpio_io = IO(Vec(n, Analog(1.W)))
       val gpioInputWires = Wire(Vec(n, Bool()))
       val gpioOutputWires = Wire(Vec(n, Bool()))
       val gpioEnableWires = Wire(Vec(n, Bool()))
 
       val gpioPads = TriStateBuffer(quantity=n)
       val triStateBufferWires = for {
-        ((((a,b),c),d),e) <- gpioPads zip gpioInputWires zip gpioOutputWires zip gpioEnableWires zip io.gpio_io.get
+        ((((a,b),c),d),e) <- gpioPads zip gpioInputWires zip gpioOutputWires zip gpioEnableWires zip gpio_io 
       } yield (a,b,c,d,e)
 
       triStateBufferWires map { case(buf: IOBUF, in: Bool, out: Bool, en: Bool, io: Analog) => {
         buf.io.connect(in, out, io, en)
       }}
 
-      gen.io.gpio_i.get := gpioInputWires.asUInt()
-      gpioOutputWires := gen.io.gpio_o.get.asBools()
-      gpioEnableWires := gen.io.gpio_en_o.get.asBools()
+      gen.gpio_i := gpioInputWires.asUInt()
+      gpioOutputWires := gen.gpio_o.asBools()
+      gpioEnableWires := gen.gpio_en_o.asBools()
     }
     if(configs("SPIF")("is").asInstanceOf[Boolean]){
-      io.spi_flash_cs_n.get := gen.io.spi_flash_cs_n.get
-      io.spi_flash_sclk.get := gen.io.spi_flash_sclk.get
-      io.spi_flash_mosi.get := gen.io.spi_flash_mosi.get
-      gen.io.spi_flash_miso.get := io.spi_flash_miso.get
+      val spi_flash_cs_n = IO(Output(Bool())) 
+      val spi_flash_sclk = IO(Output(Bool()))
+      val spi_flash_mosi = IO(Output(Bool()))
+      val spi_flash_miso = IO(Input(Bool()))
+      spi_flash_cs_n  := gen.spi_flash_cs_n 
+      spi_flash_sclk  := gen.spi_flash_sclk 
+      spi_flash_mosi  := gen.spi_flash_mosi 
+      gen.spi_flash_miso  := io.spi_flash_miso 
     }
     if(configs("SPI")("is").asInstanceOf[Boolean]){
-      io.spi_cs_n.get := gen.io.spi_cs_n.get
-      io.spi_sclk.get := gen.io.spi_sclk.get
-      io.spi_mosi.get := gen.io.spi_mosi.get
-      gen.io.spi_miso.get := io.spi_miso.get
+      val spi_cs_n = IO(Output(Bool())) 
+      val spi_sclk = IO(Output(Bool()))
+      val spi_mosi = IO(Output(Bool()))
+      val spi_miso = IO(Input(Bool()))
+      spi_cs_n  := gen.spi_cs_n 
+      spi_sclk  := gen.spi_sclk 
+      spi_mosi  := gen.spi_mosi 
+      gen.spi_miso  := spi_miso 
     }
     if(configs("UART")("is").asInstanceOf[Boolean]){
-      io.cio_uart_intr_tx_o.get := gen.io.cio_uart_intr_tx_o.get
-      io.cio_uart_tx_o.get := gen.io.cio_uart_tx_o.get
-      gen.io.cio_uart_rx_i.get := io.cio_uart_rx_i.get
+      val cio_uart_tx_o = IO(Output(Bool()))
+      val cio_uart_intr_tx_o = IO(Output(Bool()))
+      val cio_uart_rx_i = IO(Input(Bool()))
+      cio_uart_intr_tx_o  := gen.cio_uart_intr_tx_o 
+      cio_uart_tx_o  := gen.cio_uart_tx_o 
+      gen.cio_uart_rx_i  := cio_uart_rx_i 
     }
     if(configs("TIMER")("is").asInstanceOf[Boolean]){
-      io.timer_intr_cmp.get := gen.io.timer_intr_cmp.get
-      io.timer_intr_ovf.get := gen.io.timer_intr_ovf.get
+      val timer_intr_cmp = IO(Output(Bool()))
+      val timer_intr_ovf = IO(Output(Bool()))
+      timer_intr_cmp  := gen.timer_intr_cmp 
+      timer_intr_ovf  := gen.timer_intr_ovf 
     }
     if(configs("I2C")("is").asInstanceOf[Boolean]){
-      io.i2c_sda.get := gen.io.i2c_sda.get
-      io.i2c_scl.get := gen.io.i2c_scl.get
-      io.i2c_intr.get := gen.io.i2c_intr.get
-      gen.io.i2c_sda_in.get := io.i2c_sda_in.get
+      val i2c_sda_in = IO(Input(Bool()))
+      val i2c_sda = IO(Output(Bool()))
+      val i2c_scl = IO(Output(Bool()))
+      val i2c_intr = IO(Output(Bool()))
+      i2c_sda  := gen.i2c_sda 
+      i2c_scl  := gen.i2c_scl 
+      i2c_intr  := gen.i2c_intr 
+      gen.i2c_sda_in  := i2c_sda_in 
     }
 }
 
-class GeneratorIOs(configs:Map[Any, Map[Any, Any]], fpga:Boolean = false) extends Bundle{
-    val n = configs("GPIO")("n").asInstanceOf[Int]
+// class GeneratorIOs(configs:Map[Any, Map[Any, Any]], fpga:Boolean = false) extends Bundle{
+//     val n = configs("GPIO")("n").asInstanceOf[Int]
 
-    val gpio_io = if (configs("GPIO")("is").asInstanceOf[Boolean] & fpga) Some(Vec(n, Analog(1.W))) else None
+//     val gpio_io = if (configs("GPIO")("is").asInstanceOf[Boolean] & fpga) Some(Vec(n, Analog(1.W))) else None
 
-    val gpio_o = if (configs("GPIO")("is").asInstanceOf[Boolean] & !fpga) Some(Output(UInt(n.W))) else None       
-    val gpio_en_o = if (configs("GPIO")("is").asInstanceOf[Boolean] & !fpga) Some(Output(UInt(n.W))) else None 
-    val gpio_i = if (configs("GPIO")("is").asInstanceOf[Boolean] & !fpga) Some(Input(UInt(n.W))) else None 
+//     val gpio_o = if (configs("GPIO")("is").asInstanceOf[Boolean] & !fpga) Some(Output(UInt(n.W))) else None       
+//     val gpio_en_o = if (configs("GPIO")("is").asInstanceOf[Boolean] & !fpga) Some(Output(UInt(n.W))) else None 
+//     val gpio_i = if (configs("GPIO")("is").asInstanceOf[Boolean] & !fpga) Some(Input(UInt(n.W))) else None 
 
-    val spi_cs_n = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val spi_sclk = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val spi_mosi = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val spi_miso = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Input(Bool()))  else None 
+//     val spi_cs_n = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val spi_sclk = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val spi_mosi = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val spi_miso = if (configs("SPI")("is").asInstanceOf[Boolean]) Some(Input(Bool()))  else None 
 
-    val cio_uart_rx_i = if (configs("UART")("is").asInstanceOf[Boolean]) Some(Input(Bool())) else None 
-    val cio_uart_tx_o = if (configs("UART")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val cio_uart_intr_tx_o = if (configs("UART")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val cio_uart_rx_i = if (configs("UART")("is").asInstanceOf[Boolean]) Some(Input(Bool())) else None 
+//     val cio_uart_tx_o = if (configs("UART")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val cio_uart_intr_tx_o = if (configs("UART")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
 
-    val timer_intr_cmp = if (configs("TIMER")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val timer_intr_ovf = if (configs("TIMER")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val timer_intr_cmp = if (configs("TIMER")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val timer_intr_ovf = if (configs("TIMER")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
 
-    val spi_flash_cs_n = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val spi_flash_sclk = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None          
-    val spi_flash_mosi = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None
-    val spi_flash_miso = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Input(Bool()))  else None
+//     val spi_flash_cs_n = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val spi_flash_sclk = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None          
+//     val spi_flash_mosi = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None
+//     val spi_flash_miso = if (configs("SPIF")("is").asInstanceOf[Boolean]) Some(Input(Bool()))  else None
 
-    val i2c_sda_in = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Input(Bool())) else None 
-    val i2c_sda = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val i2c_scl = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-    val i2c_intr = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
-}
+//     val i2c_sda_in = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Input(Bool())) else None 
+//     val i2c_sda = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val i2c_scl = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+//     val i2c_intr = if (configs("I2C")("is").asInstanceOf[Boolean]) Some(Output(Bool())) else None 
+// }
 
 class Generator(programFile: Option[String],
-                 configs:Map[Any, Map[Any, Any]]) extends Module {
+                 configs:Map[Any, Map[Any, Any]]) extends MultiIOModule {
 
   val n = configs("GPIO")("n").asInstanceOf[Int]
 
-  val io = IO(new GeneratorIOs(configs))
+  // val io = IO(new GeneratorIOs(configs))
 
   if (configs("WB")("is").asInstanceOf[Boolean]){
     implicit val config:WishboneConfig = WishboneConfig(32,32)
@@ -129,19 +147,21 @@ class Generator(programFile: Option[String],
     addressMap.addDevice(Peripherals.all(configs("DCCM")("id").asInstanceOf[Int]), configs("DCCM")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_dmem_slave)
 
     if(configs("GPIO")("is").asInstanceOf[Boolean]){
-        // GPIO
         val gpio = Module(new Gpio(new WBRequest(), new WBResponse()))
         val gen_gpio_slave = Module(new WishboneDevice())
 
         gen_gpio_slave.io.reqOut <> gpio.io.req
         gen_gpio_slave.io.rspIn <> gpio.io.rsp
 
-        io.gpio_o.get := gpio.io.cio_gpio_o(n-1,0)
-        io.gpio_en_o.get := gpio.io.cio_gpio_en_o(n-1,0)
-        gpio.io.cio_gpio_i := io.gpio_i.get
+        val gpio_o = IO(Output(UInt(n.W)))
+        val gpio_en_o = IO(Output(UInt(n.W)))
+        val gpio_i = IO(Input(UInt(n.W)))
+
+        gpio_o := gpio.io.cio_gpio_o(n-1,0)
+        gpio_en_o := gpio.io.cio_gpio_en_o(n-1,0)
+        gpio.io.cio_gpio_i := gpio_i
 
         addressMap.addDevice(Peripherals.all(configs("GPIO")("id").asInstanceOf[Int]), configs("GPIO")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_gpio_slave)
-      //
     }
     if(configs("SPI")("is").asInstanceOf[Boolean]){
       val spi = Module(new Spi(new WBRequest(), new WBResponse()))
@@ -150,10 +170,15 @@ class Generator(programFile: Option[String],
       gen_spi_slave.io.reqOut <> spi.io.req
       gen_spi_slave.io.rspIn <> spi.io.rsp
 
-      io.spi_cs_n.get := spi.io.cs_n
-      io.spi_sclk.get := spi.io.sclk
-      io.spi_mosi.get := spi.io.mosi
-      spi.io.miso := io.spi_miso.get
+      val spi_cs_n = IO(Output(Bool())) 
+      val spi_sclk = IO(Output(Bool()))
+      val spi_mosi = IO(Output(Bool()))
+      val spi_miso = IO(Input(Bool()))
+
+      spi_cs_n  := spi.io.cs_n
+      spi_sclk  := spi.io.sclk
+      spi_mosi  := spi.io.mosi
+      spi.io.miso := spi_miso 
 
       addressMap.addDevice(Peripherals.all(configs("SPI")("id").asInstanceOf[Int]), configs("SPI")("baseAddr").asInstanceOf[String].U(32.W), configs("SPI")("mask").asInstanceOf[String].U(32.W), gen_spi_slave)
     }
@@ -164,9 +189,13 @@ class Generator(programFile: Option[String],
       gen_uart_slave.io.reqOut <> uart.io.request
       gen_uart_slave.io.rspIn <> uart.io.response
 
-      uart.io.cio_uart_rx_i := io.cio_uart_rx_i.get
-      io.cio_uart_tx_o.get := uart.io.cio_uart_tx_o
-      io.cio_uart_intr_tx_o.get := uart.io.cio_uart_intr_tx_o  
+      val cio_uart_tx_o = IO(Output(Bool()))
+      val cio_uart_intr_tx_o = IO(Output(Bool()))
+      val cio_uart_rx_i = IO(Input(Bool()))
+
+      uart.io.cio_uart_rx_i := cio_uart_rx_i 
+      cio_uart_tx_o  := uart.io.cio_uart_tx_o
+      cio_uart_intr_tx_o  := uart.io.cio_uart_intr_tx_o  
 
       addressMap.addDevice(Peripherals.all(configs("UART")("id").asInstanceOf[Int]), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
     }
@@ -175,10 +204,13 @@ class Generator(programFile: Option[String],
       val gen_timer_slave = Module(new WishboneDevice())
 
       gen_timer_slave.io.reqOut <> timer.io.req
-      gen_timer_slave.io.rspIn <> timer.io.rsp 
+      gen_timer_slave.io.rspIn <> timer.io.rsp
 
-      io.timer_intr_cmp.get := timer.io.cio_timer_intr_cmp
-      io.timer_intr_ovf.get := timer.io.cio_timer_intr_ovf
+      val timer_intr_cmp = IO(Output(Bool()))
+      val timer_intr_ovf = IO(Output(Bool()))
+
+      timer_intr_cmp  := timer.io.cio_timer_intr_cmp
+      timer_intr_ovf  := timer.io.cio_timer_intr_ovf
 
       addressMap.addDevice(Peripherals.all(configs("TIMER")("id").asInstanceOf[Int]), configs("TIMER")("baseAddr").asInstanceOf[String].U(32.W), configs("TIMER")("mask").asInstanceOf[String].U(32.W), gen_timer_slave)
     }
@@ -189,10 +221,15 @@ class Generator(programFile: Option[String],
       gen_spi_flash_slave.io.reqOut <> spi_flash.io.req
       gen_spi_flash_slave.io.rspIn <> spi_flash.io.rsp
 
-      io.spi_flash_cs_n.get := spi_flash.io.cs_n
-      io.spi_flash_sclk.get := spi_flash.io.sclk
-      io.spi_flash_mosi.get := spi_flash.io.mosi
-      spi_flash.io.miso := io.spi_flash_miso.get
+      val spi_flash_cs_n = IO(Output(Bool())) 
+      val spi_flash_sclk = IO(Output(Bool()))
+      val spi_flash_mosi = IO(Output(Bool()))
+      val spi_flash_miso = IO(Input(Bool()))
+
+      spi_flash_cs_n  := spi_flash.io.cs_n
+      spi_flash_sclk  := spi_flash.io.sclk
+      spi_flash_mosi  := spi_flash.io.mosi
+      spi_flash.io.miso := spi_flash_miso 
 
       addressMap.addDevice(Peripherals.all(configs("SPIF")("id").asInstanceOf[Int]), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
     }
@@ -201,12 +238,17 @@ class Generator(programFile: Option[String],
       val gen_i2c_slave = Module(new WishboneDevice())
 
       gen_i2c_slave.io.reqOut <> i2c.io.request
-      gen_i2c_slave.io.rspIn <> i2c.io.response 
+      gen_i2c_slave.io.rspIn <> i2c.io.response
 
-      i2c.io.cio_i2c_sda_in := io.i2c_sda_in.get
-      io.i2c_sda.get := i2c.io.cio_i2c_sda
-      io.i2c_scl.get := i2c.io.cio_i2c_scl
-      io.i2c_intr.get := i2c.io.cio_i2c_intr
+      val i2c_sda_in = IO(Input(Bool()))
+      val i2c_sda = IO(Output(Bool()))
+      val i2c_scl = IO(Output(Bool()))
+      val i2c_intr = IO(Output(Bool()))
+
+      i2c.io.cio_i2c_sda_in := i2c_sda_in 
+      i2c_sda  := i2c.io.cio_i2c_sda
+      i2c_scl  := i2c.io.cio_i2c_scl
+      i2c_intr  := i2c.io.cio_i2c_intr
 
       addressMap.addDevice(Peripherals.all(configs("I2C")("id").asInstanceOf[Int]), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
 
@@ -271,9 +313,13 @@ class Generator(programFile: Option[String],
         gen_gpio_slave.io.reqOut <> gpio.io.req
         gen_gpio_slave.io.rspIn <> gpio.io.rsp
 
-        io.gpio_o.get := gpio.io.cio_gpio_o(n-1,0)
-        io.gpio_en_o.get := gpio.io.cio_gpio_en_o(n-1,0)
-        gpio.io.cio_gpio_i := io.gpio_i.get
+        val gpio_o = IO(Output(UInt(n.W)))
+        val gpio_en_o = IO(Output(UInt(n.W)))
+        val gpio_i = IO(Input(UInt(n.W)))
+
+        gpio_o := gpio.io.cio_gpio_o(n-1,0)
+        gpio_en_o := gpio.io.cio_gpio_en_o(n-1,0)
+        gpio.io.cio_gpio_i := gpio_i
 
         addressMap.addDevice(Peripherals.all(configs("GPIO")("id").asInstanceOf[Int]), configs("GPIO")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_gpio_slave)
       //
@@ -285,10 +331,16 @@ class Generator(programFile: Option[String],
       gen_spi_slave.io.reqOut <> spi.io.req
       gen_spi_slave.io.rspIn <> spi.io.rsp
 
-      io.spi_cs_n.get := spi.io.cs_n
-      io.spi_sclk.get := spi.io.sclk
-      io.spi_mosi.get := spi.io.mosi
-      spi.io.miso := io.spi_miso.get
+      val spi_cs_n = IO(Output(Bool())) 
+      val spi_sclk = IO(Output(Bool()))
+      val spi_mosi = IO(Output(Bool()))
+      val spi_miso = IO(Input(Bool()))
+
+      spi_cs_n  := spi.io.cs_n
+      spi_sclk  := spi.io.sclk
+      spi_mosi  := spi.io.mosi
+      spi.io.miso := spi_miso 
+
 
       addressMap.addDevice(Peripherals.all(configs("SPI")("id").asInstanceOf[Int]), configs("SPI")("baseAddr").asInstanceOf[String].U(32.W), configs("SPI")("mask").asInstanceOf[String].U(32.W), gen_spi_slave)
     }
@@ -299,9 +351,13 @@ class Generator(programFile: Option[String],
       gen_uart_slave.io.reqOut <> uart.io.request
       gen_uart_slave.io.rspIn <> uart.io.response
 
-      uart.io.cio_uart_rx_i := io.cio_uart_rx_i.get
-      io.cio_uart_tx_o.get := uart.io.cio_uart_tx_o
-      io.cio_uart_intr_tx_o.get := uart.io.cio_uart_intr_tx_o  
+      val cio_uart_tx_o = IO(Output(Bool()))
+      val cio_uart_intr_tx_o = IO(Output(Bool()))
+      val cio_uart_rx_i = IO(Input(Bool()))
+
+      uart.io.cio_uart_rx_i := cio_uart_rx_i 
+      cio_uart_tx_o  := uart.io.cio_uart_tx_o
+      cio_uart_intr_tx_o  := uart.io.cio_uart_intr_tx_o  
 
       addressMap.addDevice(Peripherals.all(configs("UART")("id").asInstanceOf[Int]), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
     }
@@ -312,8 +368,11 @@ class Generator(programFile: Option[String],
       gen_timer_slave.io.reqOut <> timer.io.req
       gen_timer_slave.io.rspIn <> timer.io.rsp 
 
-      io.timer_intr_cmp.get := timer.io.cio_timer_intr_cmp
-      io.timer_intr_ovf.get := timer.io.cio_timer_intr_ovf
+      val timer_intr_cmp = IO(Output(Bool()))
+      val timer_intr_ovf = IO(Output(Bool()))
+
+      timer_intr_cmp  := timer.io.cio_timer_intr_cmp
+      timer_intr_ovf  := timer.io.cio_timer_intr_ovf
 
       addressMap.addDevice(Peripherals.all(configs("TIMER")("id").asInstanceOf[Int]), configs("TIMER")("baseAddr").asInstanceOf[String].U(32.W), configs("TIMER")("mask").asInstanceOf[String].U(32.W), gen_timer_slave)
     }
@@ -324,10 +383,15 @@ class Generator(programFile: Option[String],
       gen_spi_flash_slave.io.reqOut <> spi_flash.io.req
       gen_spi_flash_slave.io.rspIn <> spi_flash.io.rsp
 
-      io.spi_flash_cs_n.get := spi_flash.io.cs_n
-      io.spi_flash_sclk.get := spi_flash.io.sclk
-      io.spi_flash_mosi.get := spi_flash.io.mosi
-      spi_flash.io.miso := io.spi_flash_miso.get
+      val spi_flash_cs_n = IO(Output(Bool()))
+      val spi_flash_sclk = IO(Output(Bool()))
+      val spi_flash_mosi = IO(Output(Bool()))
+      val spi_flash_miso = IO(Input(Bool()))
+
+      spi_flash_cs_n  := spi_flash.io.cs_n
+      spi_flash_sclk  := spi_flash.io.sclk
+      spi_flash_mosi  := spi_flash.io.mosi
+      spi_flash.io.miso := spi_flash_miso 
 
       addressMap.addDevice(Peripherals.all(configs("SPIF")("id").asInstanceOf[Int]), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
     }
@@ -338,10 +402,15 @@ class Generator(programFile: Option[String],
       gen_i2c_slave.io.reqOut <> i2c.io.request
       gen_i2c_slave.io.rspIn <> i2c.io.response 
 
-      i2c.io.cio_i2c_sda_in := io.i2c_sda_in.get
-      io.i2c_sda.get := i2c.io.cio_i2c_sda
-      io.i2c_scl.get := i2c.io.cio_i2c_scl
-      io.i2c_intr.get := i2c.io.cio_i2c_intr
+      val i2c_sda_in = IO(Input(Bool()))
+      val i2c_sda = IO(Output(Bool()))
+      val i2c_scl = IO(Output(Bool()))
+      val i2c_intr = IO(Output(Bool()))
+
+      i2c.io.cio_i2c_sda_in := i2c_sda_in 
+      i2c_sda  := i2c.io.cio_i2c_sda
+      i2c_scl  := i2c.io.cio_i2c_scl
+      i2c_intr  := i2c.io.cio_i2c_intr
 
       addressMap.addDevice(Peripherals.all(configs("I2C")("id").asInstanceOf[Int]), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
 
@@ -406,9 +475,13 @@ class Generator(programFile: Option[String],
         gen_gpio_slave.io.reqOut <> gpio.io.req
         gen_gpio_slave.io.rspIn <> gpio.io.rsp
 
-        io.gpio_o.get := gpio.io.cio_gpio_o(n-1,0)
-        io.gpio_en_o.get := gpio.io.cio_gpio_en_o(n-1,0)
-        gpio.io.cio_gpio_i := io.gpio_i.get
+        val gpio_o = IO(Output(UInt(n.W)))
+        val gpio_en_o = IO(Output(UInt(n.W)))
+        val gpio_i = IO(Input(UInt(n.W)))
+
+        gpio_o := gpio.io.cio_gpio_o(n-1,0)
+        gpio_en_o := gpio.io.cio_gpio_en_o(n-1,0)
+        gpio.io.cio_gpio_i := gpio_i
 
         addressMap.addDevice(Peripherals.all(configs("GPIO")("id").asInstanceOf[Int]), configs("GPIO")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_gpio_slave)
       //
@@ -420,10 +493,15 @@ class Generator(programFile: Option[String],
       gen_spi_slave.io.reqOut <> spi.io.req
       gen_spi_slave.io.rspIn <> spi.io.rsp
 
-      io.spi_cs_n.get := spi.io.cs_n
-      io.spi_sclk.get := spi.io.sclk
-      io.spi_mosi.get := spi.io.mosi
-      spi.io.miso := io.spi_miso.get
+      val spi_cs_n = IO(Output(Bool())) 
+      val spi_sclk = IO(Output(Bool()))
+      val spi_mosi = IO(Output(Bool()))
+      val spi_miso = IO(Input(Bool()))
+
+      spi_cs_n  := spi.io.cs_n
+      spi_sclk  := spi.io.sclk
+      spi_mosi  := spi.io.mosi
+      spi.io.miso := spi_miso 
 
       addressMap.addDevice(Peripherals.all(configs("SPI")("id").asInstanceOf[Int]), configs("SPI")("baseAddr").asInstanceOf[String].U(32.W), configs("SPI")("mask").asInstanceOf[String].U(32.W), gen_spi_slave)
     }
@@ -434,9 +512,13 @@ class Generator(programFile: Option[String],
       gen_uart_slave.io.reqOut <> uart.io.request
       gen_uart_slave.io.rspIn <> uart.io.response
 
-      uart.io.cio_uart_rx_i := io.cio_uart_rx_i.get
-      io.cio_uart_tx_o.get := uart.io.cio_uart_tx_o
-      io.cio_uart_intr_tx_o.get := uart.io.cio_uart_intr_tx_o  
+      val cio_uart_tx_o = IO(Output(Bool()))
+      val cio_uart_intr_tx_o = IO(Output(Bool()))
+      val cio_uart_rx_i = IO(Input(Bool()))
+
+      uart.io.cio_uart_rx_i := cio_uart_rx_i 
+      cio_uart_tx_o  := uart.io.cio_uart_tx_o
+      cio_uart_intr_tx_o  := uart.io.cio_uart_intr_tx_o    
 
       addressMap.addDevice(Peripherals.all(configs("UART")("id").asInstanceOf[Int]), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
     }
@@ -447,8 +529,11 @@ class Generator(programFile: Option[String],
       gen_timer_slave.io.reqOut <> timer.io.req
       gen_timer_slave.io.rspIn <> timer.io.rsp 
 
-      io.timer_intr_cmp.get := timer.io.cio_timer_intr_cmp
-      io.timer_intr_ovf.get := timer.io.cio_timer_intr_ovf
+      val timer_intr_cmp = IO(Output(Bool()))
+      val timer_intr_ovf = IO(Output(Bool()))
+
+      timer_intr_cmp  := timer.io.cio_timer_intr_cmp
+      timer_intr_ovf  := timer.io.cio_timer_intr_ovf
 
       addressMap.addDevice(Peripherals.all(configs("TIMER")("id").asInstanceOf[Int]), configs("TIMER")("baseAddr").asInstanceOf[String].U(32.W), configs("TIMER")("mask").asInstanceOf[String].U(32.W), gen_timer_slave)
     }
@@ -459,10 +544,15 @@ class Generator(programFile: Option[String],
       gen_spi_flash_slave.io.reqOut <> spi_flash.io.req
       gen_spi_flash_slave.io.rspIn <> spi_flash.io.rsp
 
-      io.spi_flash_cs_n.get := spi_flash.io.cs_n
-      io.spi_flash_sclk.get := spi_flash.io.sclk
-      io.spi_flash_mosi.get := spi_flash.io.mosi
-      spi_flash.io.miso := io.spi_flash_miso.get
+      val spi_flash_cs_n = IO(Output(Bool())) 
+      val spi_flash_sclk = IO(Output(Bool()))
+      val spi_flash_mosi = IO(Output(Bool()))
+      val spi_flash_miso = IO(Input(Bool()))
+
+      spi_flash_cs_n  := spi_flash.io.cs_n
+      spi_flash_sclk  := spi_flash.io.sclk
+      spi_flash_mosi  := spi_flash.io.mosi
+      spi_flash.io.miso := spi_flash_miso 
 
       addressMap.addDevice(Peripherals.all(configs("SPIF")("id").asInstanceOf[Int]), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
     }
@@ -473,10 +563,15 @@ class Generator(programFile: Option[String],
       gen_i2c_slave.io.reqOut <> i2c.io.request
       gen_i2c_slave.io.rspIn <> i2c.io.response 
 
-      i2c.io.cio_i2c_sda_in := io.i2c_sda_in.get
-      io.i2c_sda.get := i2c.io.cio_i2c_sda
-      io.i2c_scl.get := i2c.io.cio_i2c_scl
-      io.i2c_intr.get := i2c.io.cio_i2c_intr
+      val i2c_sda_in = IO(Input(Bool()))
+      val i2c_sda = IO(Output(Bool()))
+      val i2c_scl = IO(Output(Bool()))
+      val i2c_intr = IO(Output(Bool()))
+
+      i2c.io.cio_i2c_sda_in := i2c_sda_in 
+      i2c_sda  := i2c.io.cio_i2c_sda
+      i2c_scl  := i2c.io.cio_i2c_scl
+      i2c_intr  := i2c.io.cio_i2c_intr
 
       addressMap.addDevice(Peripherals.all(configs("I2C")("id").asInstanceOf[Int]), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
 
