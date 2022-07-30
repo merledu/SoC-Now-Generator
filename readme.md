@@ -12,3 +12,6 @@ This repo is sub-repo of [SoC-Now](https://github.com/merledu/SoC-Now) which pro
 | [Caravan](https://github.com/merledu/caravan)  | Bus Interconnects  |
 | [Jigsaw](https://github.com/merledu/jigsaw)  | Devices / Peripherals  |
 | [Cachefy](https://github.com/merledu/cachefy)  | Caches  |
+
+### Block Diagram
+<img src="https://github.com/merledu/SoC-Now-Generator/blob/main/blockDiagramv2.jpeg" style="width:100%" />
