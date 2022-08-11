@@ -1291,671 +1291,6 @@ end // initial
 `endif
 `endif // SYNTHESIS
 endmodule
-module uartTX(
-  input         clock,
-  input         reset,
-  input         io_tx_en,
-  input  [7:0]  io_i_TX_Byte,
-  input  [15:0] io_CLKS_PER_BIT,
-  output        io_o_TX_Serial,
-  output        io_o_TX_Done
-);
-`ifdef RANDOMIZE_REG_INIT
-  reg [31:0] _RAND_0;
-  reg [31:0] _RAND_1;
-  reg [31:0] _RAND_2;
-  reg [31:0] _RAND_3;
-  reg [31:0] _RAND_4;
-`endif // RANDOMIZE_REG_INIT
-  reg [2:0] r_SM_Main; // @[uartTX.scala 23:28]
-  reg [15:0] r_Clock_Count; // @[uartTX.scala 24:32]
-  reg [2:0] r_Bit_Index; // @[uartTX.scala 25:30]
-  reg [7:0] r_TX_Data; // @[uartTX.scala 26:28]
-  reg  r_TX_Done; // @[uartTX.scala 27:28]
-  wire  _T = 3'h0 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire  _T_2 = 3'h1 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire [15:0] _T_4 = io_CLKS_PER_BIT - 16'h1; // @[uartTX.scala 51:49]
-  wire  _T_5 = r_Clock_Count < _T_4; // @[uartTX.scala 51:32]
-  wire [15:0] _r_Clock_Count_T_1 = r_Clock_Count + 16'h1; // @[uartTX.scala 52:48]
-  wire [15:0] _GEN_2 = r_Clock_Count < _T_4 ? _r_Clock_Count_T_1 : 16'h0; // @[uartTX.scala 51:54 uartTX.scala 52:31 uartTX.scala 55:31]
-  wire  _T_6 = 3'h2 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire [7:0] _io_o_TX_Serial_T = r_TX_Data >> r_Bit_Index; // @[uartTX.scala 61:40]
-  wire [2:0] _r_Bit_Index_T_1 = r_Bit_Index + 3'h1; // @[uartTX.scala 69:48]
-  wire [2:0] _GEN_4 = r_Bit_Index < 3'h7 ? _r_Bit_Index_T_1 : 3'h0; // @[uartTX.scala 68:40 uartTX.scala 69:33 uartTX.scala 72:33]
-  wire [2:0] _GEN_5 = r_Bit_Index < 3'h7 ? 3'h2 : 3'h3; // @[uartTX.scala 68:40 uartTX.scala 70:31 uartTX.scala 73:31]
-  wire [2:0] _GEN_7 = _T_5 ? 3'h2 : _GEN_5; // @[uartTX.scala 63:56 uartTX.scala 65:27]
-  wire [2:0] _GEN_8 = _T_5 ? r_Bit_Index : _GEN_4; // @[uartTX.scala 63:56 uartTX.scala 25:30]
-  wire  _T_11 = 3'h3 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire [2:0] _GEN_10 = _T_5 ? 3'h3 : 3'h4; // @[uartTX.scala 83:56 uartTX.scala 85:27 uartTX.scala 89:27]
-  wire  _GEN_11 = _T_5 ? r_TX_Done : 1'h1; // @[uartTX.scala 83:56 uartTX.scala 27:28 uartTX.scala 87:27]
-  wire  _T_15 = 3'h4 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire  _GEN_13 = _T_15 | r_TX_Done; // @[Conditional.scala 39:67 uartTX.scala 96:23 uartTX.scala 27:28]
-  wire [2:0] _GEN_14 = _T_15 ? 3'h0 : r_SM_Main; // @[Conditional.scala 39:67 uartTX.scala 97:23 uartTX.scala 23:28]
-  wire [15:0] _GEN_16 = _T_11 ? _GEN_2 : r_Clock_Count; // @[Conditional.scala 39:67 uartTX.scala 24:32]
-  wire [2:0] _GEN_17 = _T_11 ? _GEN_10 : _GEN_14; // @[Conditional.scala 39:67]
-  wire  _GEN_18 = _T_11 ? _GEN_11 : _GEN_13; // @[Conditional.scala 39:67]
-  wire  _GEN_19 = _T_6 ? _io_o_TX_Serial_T[0] : 1'h1; // @[Conditional.scala 39:67 uartTX.scala 61:28]
-  wire  _GEN_24 = _T_2 ? 1'h0 : _GEN_19; // @[Conditional.scala 39:67 uartTX.scala 49:28]
-  assign io_o_TX_Serial = _T | _GEN_24; // @[Conditional.scala 40:58 uartTX.scala 35:28]
-  assign io_o_TX_Done = r_TX_Done; // @[uartTX.scala 103:18]
-  always @(posedge clock) begin
-    if (reset) begin // @[uartTX.scala 23:28]
-      r_SM_Main <= 3'h0; // @[uartTX.scala 23:28]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      if (io_tx_en) begin // @[uartTX.scala 40:35]
-        r_SM_Main <= 3'h1; // @[uartTX.scala 42:27]
-      end else begin
-        r_SM_Main <= 3'h0; // @[uartTX.scala 44:27]
-      end
-    end else if (_T_2) begin // @[Conditional.scala 39:67]
-      if (r_Clock_Count < _T_4) begin // @[uartTX.scala 51:54]
-        r_SM_Main <= 3'h1; // @[uartTX.scala 53:27]
-      end else begin
-        r_SM_Main <= 3'h2; // @[uartTX.scala 56:27]
-      end
-    end else if (_T_6) begin // @[Conditional.scala 39:67]
-      r_SM_Main <= _GEN_7;
-    end else begin
-      r_SM_Main <= _GEN_17;
-    end
-    if (reset) begin // @[uartTX.scala 24:32]
-      r_Clock_Count <= 16'h0; // @[uartTX.scala 24:32]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      r_Clock_Count <= 16'h0; // @[uartTX.scala 37:27]
-    end else if (_T_2) begin // @[Conditional.scala 39:67]
-      r_Clock_Count <= _GEN_2;
-    end else if (_T_6) begin // @[Conditional.scala 39:67]
-      r_Clock_Count <= _GEN_2;
-    end else begin
-      r_Clock_Count <= _GEN_16;
-    end
-    if (reset) begin // @[uartTX.scala 25:30]
-      r_Bit_Index <= 3'h0; // @[uartTX.scala 25:30]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      r_Bit_Index <= 3'h0; // @[uartTX.scala 38:25]
-    end else if (!(_T_2)) begin // @[Conditional.scala 39:67]
-      if (_T_6) begin // @[Conditional.scala 39:67]
-        r_Bit_Index <= _GEN_8;
-      end
-    end
-    if (reset) begin // @[uartTX.scala 26:28]
-      r_TX_Data <= 8'h0; // @[uartTX.scala 26:28]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      if (io_tx_en) begin // @[uartTX.scala 40:35]
-        r_TX_Data <= io_i_TX_Byte; // @[uartTX.scala 41:27]
-      end
-    end
-    if (reset) begin // @[uartTX.scala 27:28]
-      r_TX_Done <= 1'h0; // @[uartTX.scala 27:28]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      r_TX_Done <= 1'h0; // @[uartTX.scala 36:23]
-    end else if (!(_T_2)) begin // @[Conditional.scala 39:67]
-      if (!(_T_6)) begin // @[Conditional.scala 39:67]
-        r_TX_Done <= _GEN_18;
-      end
-    end
-  end
-// Register and memory initialization
-`ifdef RANDOMIZE_GARBAGE_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_INVALID_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_REG_INIT
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-`define RANDOMIZE
-`endif
-`ifndef RANDOM
-`define RANDOM $random
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-  integer initvar;
-`endif
-`ifndef SYNTHESIS
-`ifdef FIRRTL_BEFORE_INITIAL
-`FIRRTL_BEFORE_INITIAL
-`endif
-initial begin
-  `ifdef RANDOMIZE
-    `ifdef INIT_RANDOM
-      `INIT_RANDOM
-    `endif
-    `ifndef VERILATOR
-      `ifdef RANDOMIZE_DELAY
-        #`RANDOMIZE_DELAY begin end
-      `else
-        #0.002 begin end
-      `endif
-    `endif
-`ifdef RANDOMIZE_REG_INIT
-  _RAND_0 = {1{`RANDOM}};
-  r_SM_Main = _RAND_0[2:0];
-  _RAND_1 = {1{`RANDOM}};
-  r_Clock_Count = _RAND_1[15:0];
-  _RAND_2 = {1{`RANDOM}};
-  r_Bit_Index = _RAND_2[2:0];
-  _RAND_3 = {1{`RANDOM}};
-  r_TX_Data = _RAND_3[7:0];
-  _RAND_4 = {1{`RANDOM}};
-  r_TX_Done = _RAND_4[0:0];
-`endif // RANDOMIZE_REG_INIT
-  `endif // RANDOMIZE
-end // initial
-`ifdef FIRRTL_AFTER_INITIAL
-`FIRRTL_AFTER_INITIAL
-`endif
-`endif // SYNTHESIS
-endmodule
-module uartRX(
-  input         clock,
-  input         reset,
-  input         io_i_Rx_Serial,
-  input  [15:0] io_CLKS_PER_BIT,
-  output        io_o_Rx_DV,
-  output [7:0]  io_o_Rx_Byte
-);
-`ifdef RANDOMIZE_REG_INIT
-  reg [31:0] _RAND_0;
-  reg [31:0] _RAND_1;
-  reg [31:0] _RAND_2;
-  reg [31:0] _RAND_3;
-  reg [31:0] _RAND_4;
-  reg [31:0] _RAND_5;
-  reg [31:0] _RAND_6;
-`endif // RANDOMIZE_REG_INIT
-  reg  rxReg_REG; // @[uartRX.scala 18:32]
-  reg  rxReg; // @[uartRX.scala 18:24]
-  reg [7:0] shiftReg; // @[uartRX.scala 19:27]
-  reg [2:0] r_SM_Main; // @[uartRX.scala 21:28]
-  reg [15:0] r_Clock_Count; // @[uartRX.scala 22:32]
-  reg [2:0] r_Bit_Index; // @[uartRX.scala 23:30]
-  reg  r_Rx_DV; // @[uartRX.scala 24:26]
-  wire  _T = 3'h0 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire  _T_1 = ~io_i_Rx_Serial; // @[uartRX.scala 33:33]
-  wire  _T_2 = 3'h1 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire [15:0] _T_4 = io_CLKS_PER_BIT - 16'h1; // @[uartRX.scala 41:52]
-  wire [15:0] _T_5 = _T_4 / 2'h2; // @[uartRX.scala 41:57]
-  wire [15:0] _GEN_1 = _T_1 ? 16'h0 : r_Clock_Count; // @[uartRX.scala 42:45 uartRX.scala 43:35 uartRX.scala 22:32]
-  wire [2:0] _GEN_2 = _T_1 ? 3'h2 : 3'h0; // @[uartRX.scala 42:45 uartRX.scala 44:31 uartRX.scala 46:31]
-  wire [15:0] _r_Clock_Count_T_1 = r_Clock_Count + 16'h1; // @[uartRX.scala 49:48]
-  wire  _T_8 = 3'h2 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire  _T_11 = r_Clock_Count < _T_4; // @[uartRX.scala 55:32]
-  wire [6:0] shiftReg_lo = shiftReg[7:1]; // @[uartRX.scala 60:49]
-  wire [7:0] _shiftReg_T = {rxReg,shiftReg_lo}; // @[Cat.scala 30:58]
-  wire [2:0] _r_Bit_Index_T_1 = r_Bit_Index + 3'h1; // @[uartRX.scala 63:48]
-  wire [2:0] _GEN_5 = r_Bit_Index < 3'h7 ? _r_Bit_Index_T_1 : 3'h0; // @[uartRX.scala 62:40 uartRX.scala 63:33 uartRX.scala 66:33]
-  wire [2:0] _GEN_6 = r_Bit_Index < 3'h7 ? 3'h2 : 3'h3; // @[uartRX.scala 62:40 uartRX.scala 64:31 uartRX.scala 67:31]
-  wire [15:0] _GEN_7 = r_Clock_Count < _T_4 ? _r_Clock_Count_T_1 : 16'h0; // @[uartRX.scala 55:56 uartRX.scala 56:31 uartRX.scala 59:31]
-  wire [2:0] _GEN_8 = r_Clock_Count < _T_4 ? 3'h2 : _GEN_6; // @[uartRX.scala 55:56 uartRX.scala 57:27]
-  wire [7:0] _GEN_9 = r_Clock_Count < _T_4 ? shiftReg : _shiftReg_T; // @[uartRX.scala 55:56 uartRX.scala 19:27 uartRX.scala 60:26]
-  wire [2:0] _GEN_10 = r_Clock_Count < _T_4 ? r_Bit_Index : _GEN_5; // @[uartRX.scala 55:56 uartRX.scala 23:30]
-  wire  _T_13 = 3'h3 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire [2:0] _GEN_12 = _T_11 ? 3'h3 : 3'h4; // @[uartRX.scala 74:56 uartRX.scala 76:27 uartRX.scala 80:27]
-  wire  _GEN_13 = _T_11 ? r_Rx_DV : 1'h1; // @[uartRX.scala 74:56 uartRX.scala 24:26 uartRX.scala 78:25]
-  wire  _T_17 = 3'h4 == r_SM_Main; // @[Conditional.scala 37:30]
-  wire [2:0] _GEN_14 = _T_17 ? 3'h0 : r_SM_Main; // @[Conditional.scala 39:67 uartRX.scala 85:23 uartRX.scala 21:28]
-  wire  _GEN_15 = _T_17 ? 1'h0 : r_Rx_DV; // @[Conditional.scala 39:67 uartRX.scala 86:21 uartRX.scala 24:26]
-  wire [15:0] _GEN_16 = _T_13 ? _GEN_7 : r_Clock_Count; // @[Conditional.scala 39:67 uartRX.scala 22:32]
-  wire [2:0] _GEN_17 = _T_13 ? _GEN_12 : _GEN_14; // @[Conditional.scala 39:67]
-  wire  _GEN_18 = _T_13 ? _GEN_13 : _GEN_15; // @[Conditional.scala 39:67]
-  assign io_o_Rx_DV = r_Rx_DV; // @[uartRX.scala 90:16]
-  assign io_o_Rx_Byte = shiftReg; // @[uartRX.scala 91:18]
-  always @(posedge clock) begin
-    rxReg_REG <= reset | io_i_Rx_Serial; // @[uartRX.scala 18:32 uartRX.scala 18:32 uartRX.scala 18:32]
-    rxReg <= reset | rxReg_REG; // @[uartRX.scala 18:24 uartRX.scala 18:24 uartRX.scala 18:24]
-    if (reset) begin // @[uartRX.scala 19:27]
-      shiftReg <= 8'h0; // @[uartRX.scala 19:27]
-    end else if (!(_T)) begin // @[Conditional.scala 40:58]
-      if (!(_T_2)) begin // @[Conditional.scala 39:67]
-        if (_T_8) begin // @[Conditional.scala 39:67]
-          shiftReg <= _GEN_9;
-        end
-      end
-    end
-    if (reset) begin // @[uartRX.scala 21:28]
-      r_SM_Main <= 3'h0; // @[uartRX.scala 21:28]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      if (~io_i_Rx_Serial) begin // @[uartRX.scala 33:41]
-        r_SM_Main <= 3'h1; // @[uartRX.scala 34:27]
-      end else begin
-        r_SM_Main <= 3'h0; // @[uartRX.scala 36:27]
-      end
-    end else if (_T_2) begin // @[Conditional.scala 39:67]
-      if (r_Clock_Count == _T_5) begin // @[uartRX.scala 41:62]
-        r_SM_Main <= _GEN_2;
-      end else begin
-        r_SM_Main <= 3'h1; // @[uartRX.scala 50:27]
-      end
-    end else if (_T_8) begin // @[Conditional.scala 39:67]
-      r_SM_Main <= _GEN_8;
-    end else begin
-      r_SM_Main <= _GEN_17;
-    end
-    if (reset) begin // @[uartRX.scala 22:32]
-      r_Clock_Count <= 16'h0; // @[uartRX.scala 22:32]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      r_Clock_Count <= 16'h0; // @[uartRX.scala 29:27]
-    end else if (_T_2) begin // @[Conditional.scala 39:67]
-      if (r_Clock_Count == _T_5) begin // @[uartRX.scala 41:62]
-        r_Clock_Count <= _GEN_1;
-      end else begin
-        r_Clock_Count <= _r_Clock_Count_T_1; // @[uartRX.scala 49:31]
-      end
-    end else if (_T_8) begin // @[Conditional.scala 39:67]
-      r_Clock_Count <= _GEN_7;
-    end else begin
-      r_Clock_Count <= _GEN_16;
-    end
-    if (reset) begin // @[uartRX.scala 23:30]
-      r_Bit_Index <= 3'h0; // @[uartRX.scala 23:30]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      r_Bit_Index <= 3'h0; // @[uartRX.scala 30:25]
-    end else if (!(_T_2)) begin // @[Conditional.scala 39:67]
-      if (_T_8) begin // @[Conditional.scala 39:67]
-        r_Bit_Index <= _GEN_10;
-      end
-    end
-    if (reset) begin // @[uartRX.scala 24:26]
-      r_Rx_DV <= 1'h0; // @[uartRX.scala 24:26]
-    end else if (_T) begin // @[Conditional.scala 40:58]
-      r_Rx_DV <= 1'h0; // @[uartRX.scala 28:21]
-    end else if (!(_T_2)) begin // @[Conditional.scala 39:67]
-      if (!(_T_8)) begin // @[Conditional.scala 39:67]
-        r_Rx_DV <= _GEN_18;
-      end
-    end
-  end
-// Register and memory initialization
-`ifdef RANDOMIZE_GARBAGE_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_INVALID_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_REG_INIT
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-`define RANDOMIZE
-`endif
-`ifndef RANDOM
-`define RANDOM $random
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-  integer initvar;
-`endif
-`ifndef SYNTHESIS
-`ifdef FIRRTL_BEFORE_INITIAL
-`FIRRTL_BEFORE_INITIAL
-`endif
-initial begin
-  `ifdef RANDOMIZE
-    `ifdef INIT_RANDOM
-      `INIT_RANDOM
-    `endif
-    `ifndef VERILATOR
-      `ifdef RANDOMIZE_DELAY
-        #`RANDOMIZE_DELAY begin end
-      `else
-        #0.002 begin end
-      `endif
-    `endif
-`ifdef RANDOMIZE_REG_INIT
-  _RAND_0 = {1{`RANDOM}};
-  rxReg_REG = _RAND_0[0:0];
-  _RAND_1 = {1{`RANDOM}};
-  rxReg = _RAND_1[0:0];
-  _RAND_2 = {1{`RANDOM}};
-  shiftReg = _RAND_2[7:0];
-  _RAND_3 = {1{`RANDOM}};
-  r_SM_Main = _RAND_3[2:0];
-  _RAND_4 = {1{`RANDOM}};
-  r_Clock_Count = _RAND_4[15:0];
-  _RAND_5 = {1{`RANDOM}};
-  r_Bit_Index = _RAND_5[2:0];
-  _RAND_6 = {1{`RANDOM}};
-  r_Rx_DV = _RAND_6[0:0];
-`endif // RANDOMIZE_REG_INIT
-  `endif // RANDOMIZE
-end // initial
-`ifdef FIRRTL_AFTER_INITIAL
-`FIRRTL_AFTER_INITIAL
-`endif
-`endif // SYNTHESIS
-endmodule
-module UartTOP(
-  input         clock,
-  input         reset,
-  input         io_ren,
-  input         io_we,
-  input  [31:0] io_wdata,
-  input  [7:0]  io_addr,
-  input         io_rx_i,
-  output [31:0] io_rdata,
-  output        io_tx_o,
-  output        io_intr_tx
-);
-`ifdef RANDOMIZE_REG_INIT
-  reg [31:0] _RAND_0;
-  reg [31:0] _RAND_1;
-  reg [31:0] _RAND_2;
-  reg [31:0] _RAND_3;
-  reg [31:0] _RAND_4;
-  reg [31:0] _RAND_5;
-  reg [31:0] _RAND_6;
-  reg [31:0] _RAND_7;
-  reg [31:0] _RAND_8;
-`endif // RANDOMIZE_REG_INIT
-  wire  uart_tx_clock; // @[UartTOP.scala 60:25]
-  wire  uart_tx_reset; // @[UartTOP.scala 60:25]
-  wire  uart_tx_io_tx_en; // @[UartTOP.scala 60:25]
-  wire [7:0] uart_tx_io_i_TX_Byte; // @[UartTOP.scala 60:25]
-  wire [15:0] uart_tx_io_CLKS_PER_BIT; // @[UartTOP.scala 60:25]
-  wire  uart_tx_io_o_TX_Serial; // @[UartTOP.scala 60:25]
-  wire  uart_tx_io_o_TX_Done; // @[UartTOP.scala 60:25]
-  wire  uart_rx_clock; // @[UartTOP.scala 69:25]
-  wire  uart_rx_reset; // @[UartTOP.scala 69:25]
-  wire  uart_rx_io_i_Rx_Serial; // @[UartTOP.scala 69:25]
-  wire [15:0] uart_rx_io_CLKS_PER_BIT; // @[UartTOP.scala 69:25]
-  wire  uart_rx_io_o_Rx_DV; // @[UartTOP.scala 69:25]
-  wire [7:0] uart_rx_io_o_Rx_Byte; // @[UartTOP.scala 69:25]
-  reg [15:0] control; // @[UartTOP.scala 29:26]
-  reg [7:0] tx; // @[UartTOP.scala 30:21]
-  reg [7:0] rx; // @[UartTOP.scala 31:21]
-  reg [7:0] rx_reg; // @[UartTOP.scala 32:25]
-  reg  rx_en; // @[UartTOP.scala 33:24]
-  reg  tx_en; // @[UartTOP.scala 34:24]
-  reg  rx_status; // @[UartTOP.scala 35:28]
-  reg  rx_clr; // @[UartTOP.scala 36:25]
-  reg  rx_done; // @[UartTOP.scala 37:26]
-  wire  _GEN_0 = io_addr == 8'h18 & io_wdata[0]; // @[UartTOP.scala 48:38 UartTOP.scala 49:20 UartTOP.scala 55:20]
-  wire [7:0] _GEN_1 = io_addr == 8'h18 ? tx : 8'h0; // @[UartTOP.scala 48:38 UartTOP.scala 30:21 UartTOP.scala 52:16]
-  wire  _GEN_2 = io_addr == 8'h18 & rx_en; // @[UartTOP.scala 48:38 UartTOP.scala 33:24 UartTOP.scala 53:19]
-  wire  _GEN_3 = io_addr == 8'h18 & tx_en; // @[UartTOP.scala 48:38 UartTOP.scala 34:24 UartTOP.scala 54:19]
-  wire  _GEN_4 = io_addr == 8'h10 ? io_wdata[0] : _GEN_3; // @[UartTOP.scala 46:38 UartTOP.scala 47:19]
-  wire  _GEN_5 = io_addr == 8'h10 ? rx_clr : _GEN_0; // @[UartTOP.scala 46:38 UartTOP.scala 36:25]
-  wire [7:0] _GEN_6 = io_addr == 8'h10 ? tx : _GEN_1; // @[UartTOP.scala 46:38 UartTOP.scala 30:21]
-  wire  _GEN_7 = io_addr == 8'h10 ? rx_en : _GEN_2; // @[UartTOP.scala 46:38 UartTOP.scala 33:24]
-  wire  _GEN_8 = io_addr == 8'hc ? io_wdata[0] : _GEN_7; // @[UartTOP.scala 44:38 UartTOP.scala 45:19]
-  wire  _GEN_9 = io_addr == 8'hc ? tx_en : _GEN_4; // @[UartTOP.scala 44:38 UartTOP.scala 34:24]
-  wire  _GEN_10 = io_addr == 8'hc ? rx_clr : _GEN_5; // @[UartTOP.scala 44:38 UartTOP.scala 36:25]
-  wire [7:0] _GEN_11 = io_addr == 8'hc ? tx : _GEN_6; // @[UartTOP.scala 44:38 UartTOP.scala 30:21]
-  wire  _GEN_15 = io_addr == 8'h4 ? rx_clr : _GEN_10; // @[UartTOP.scala 42:40 UartTOP.scala 36:25]
-  wire  _GEN_20 = io_addr == 8'h0 ? rx_clr : _GEN_15; // @[UartTOP.scala 40:36 UartTOP.scala 36:25]
-  wire  _GEN_25 = ~io_ren & io_we ? _GEN_20 : rx_clr; // @[UartTOP.scala 39:29 UartTOP.scala 36:25]
-  wire  _GEN_27 = ~rx_clr ? 1'h0 : rx_status; // @[UartTOP.scala 84:26 UartTOP.scala 85:19 UartTOP.scala 35:28]
-  wire  _GEN_29 = rx_done | _GEN_27; // @[UartTOP.scala 81:18 UartTOP.scala 83:19]
-  wire [7:0] _io_rdata_T_2 = io_addr == 8'h8 ? rx_reg : 8'h0; // @[UartTOP.scala 88:55]
-  wire [7:0] _io_rdata_T_3 = io_addr == 8'h14 ? {{7'd0}, rx_status} : _io_rdata_T_2; // @[UartTOP.scala 88:20]
-  uartTX uart_tx ( // @[UartTOP.scala 60:25]
-    .clock(uart_tx_clock),
-    .reset(uart_tx_reset),
-    .io_tx_en(uart_tx_io_tx_en),
-    .io_i_TX_Byte(uart_tx_io_i_TX_Byte),
-    .io_CLKS_PER_BIT(uart_tx_io_CLKS_PER_BIT),
-    .io_o_TX_Serial(uart_tx_io_o_TX_Serial),
-    .io_o_TX_Done(uart_tx_io_o_TX_Done)
-  );
-  uartRX uart_rx ( // @[UartTOP.scala 69:25]
-    .clock(uart_rx_clock),
-    .reset(uart_rx_reset),
-    .io_i_Rx_Serial(uart_rx_io_i_Rx_Serial),
-    .io_CLKS_PER_BIT(uart_rx_io_CLKS_PER_BIT),
-    .io_o_Rx_DV(uart_rx_io_o_Rx_DV),
-    .io_o_Rx_Byte(uart_rx_io_o_Rx_Byte)
-  );
-  assign io_rdata = {{24'd0}, _io_rdata_T_3}; // @[UartTOP.scala 88:20]
-  assign io_tx_o = uart_tx_io_o_TX_Serial; // @[UartTOP.scala 66:13]
-  assign io_intr_tx = uart_tx_io_o_TX_Done; // @[UartTOP.scala 67:16]
-  assign uart_tx_clock = clock;
-  assign uart_tx_reset = reset;
-  assign uart_tx_io_tx_en = tx_en; // @[UartTOP.scala 61:22]
-  assign uart_tx_io_i_TX_Byte = tx; // @[UartTOP.scala 62:26]
-  assign uart_tx_io_CLKS_PER_BIT = control; // @[UartTOP.scala 63:29]
-  assign uart_rx_clock = clock;
-  assign uart_rx_reset = reset;
-  assign uart_rx_io_i_Rx_Serial = rx_en ? io_rx_i : 1'h1; // @[UartTOP.scala 70:16 UartTOP.scala 71:32 UartTOP.scala 73:32]
-  assign uart_rx_io_CLKS_PER_BIT = control; // @[UartTOP.scala 75:29]
-  always @(posedge clock) begin
-    if (reset) begin // @[UartTOP.scala 29:26]
-      control <= 16'h0; // @[UartTOP.scala 29:26]
-    end else if (~io_ren & io_we) begin // @[UartTOP.scala 39:29]
-      if (io_addr == 8'h0) begin // @[UartTOP.scala 40:36]
-        control <= io_wdata[15:0]; // @[UartTOP.scala 41:21]
-      end
-    end
-    if (reset) begin // @[UartTOP.scala 30:21]
-      tx <= 8'h0; // @[UartTOP.scala 30:21]
-    end else if (~io_ren & io_we) begin // @[UartTOP.scala 39:29]
-      if (!(io_addr == 8'h0)) begin // @[UartTOP.scala 40:36]
-        if (io_addr == 8'h4) begin // @[UartTOP.scala 42:40]
-          tx <= io_wdata[7:0]; // @[UartTOP.scala 43:16]
-        end else begin
-          tx <= _GEN_11;
-        end
-      end
-    end
-    if (reset) begin // @[UartTOP.scala 31:21]
-      rx <= 8'h0; // @[UartTOP.scala 31:21]
-    end else begin
-      rx <= uart_rx_io_o_Rx_Byte; // @[UartTOP.scala 78:8]
-    end
-    if (reset) begin // @[UartTOP.scala 32:25]
-      rx_reg <= 8'h0; // @[UartTOP.scala 32:25]
-    end else if (rx_done) begin // @[UartTOP.scala 81:18]
-      rx_reg <= rx; // @[UartTOP.scala 82:16]
-    end
-    if (reset) begin // @[UartTOP.scala 33:24]
-      rx_en <= 1'h0; // @[UartTOP.scala 33:24]
-    end else if (~io_ren & io_we) begin // @[UartTOP.scala 39:29]
-      if (!(io_addr == 8'h0)) begin // @[UartTOP.scala 40:36]
-        if (!(io_addr == 8'h4)) begin // @[UartTOP.scala 42:40]
-          rx_en <= _GEN_8;
-        end
-      end
-    end
-    if (reset) begin // @[UartTOP.scala 34:24]
-      tx_en <= 1'h0; // @[UartTOP.scala 34:24]
-    end else if (~io_ren & io_we) begin // @[UartTOP.scala 39:29]
-      if (!(io_addr == 8'h0)) begin // @[UartTOP.scala 40:36]
-        if (!(io_addr == 8'h4)) begin // @[UartTOP.scala 42:40]
-          tx_en <= _GEN_9;
-        end
-      end
-    end
-    if (reset) begin // @[UartTOP.scala 35:28]
-      rx_status <= 1'h0; // @[UartTOP.scala 35:28]
-    end else begin
-      rx_status <= _GEN_29;
-    end
-    rx_clr <= reset | _GEN_25; // @[UartTOP.scala 36:25 UartTOP.scala 36:25]
-    if (reset) begin // @[UartTOP.scala 37:26]
-      rx_done <= 1'h0; // @[UartTOP.scala 37:26]
-    end else begin
-      rx_done <= uart_rx_io_o_Rx_DV; // @[UartTOP.scala 77:13]
-    end
-  end
-// Register and memory initialization
-`ifdef RANDOMIZE_GARBAGE_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_INVALID_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_REG_INIT
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-`define RANDOMIZE
-`endif
-`ifndef RANDOM
-`define RANDOM $random
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-  integer initvar;
-`endif
-`ifndef SYNTHESIS
-`ifdef FIRRTL_BEFORE_INITIAL
-`FIRRTL_BEFORE_INITIAL
-`endif
-initial begin
-  `ifdef RANDOMIZE
-    `ifdef INIT_RANDOM
-      `INIT_RANDOM
-    `endif
-    `ifndef VERILATOR
-      `ifdef RANDOMIZE_DELAY
-        #`RANDOMIZE_DELAY begin end
-      `else
-        #0.002 begin end
-      `endif
-    `endif
-`ifdef RANDOMIZE_REG_INIT
-  _RAND_0 = {1{`RANDOM}};
-  control = _RAND_0[15:0];
-  _RAND_1 = {1{`RANDOM}};
-  tx = _RAND_1[7:0];
-  _RAND_2 = {1{`RANDOM}};
-  rx = _RAND_2[7:0];
-  _RAND_3 = {1{`RANDOM}};
-  rx_reg = _RAND_3[7:0];
-  _RAND_4 = {1{`RANDOM}};
-  rx_en = _RAND_4[0:0];
-  _RAND_5 = {1{`RANDOM}};
-  tx_en = _RAND_5[0:0];
-  _RAND_6 = {1{`RANDOM}};
-  rx_status = _RAND_6[0:0];
-  _RAND_7 = {1{`RANDOM}};
-  rx_clr = _RAND_7[0:0];
-  _RAND_8 = {1{`RANDOM}};
-  rx_done = _RAND_8[0:0];
-`endif // RANDOMIZE_REG_INIT
-  `endif // RANDOMIZE
-end // initial
-`ifdef FIRRTL_AFTER_INITIAL
-`FIRRTL_AFTER_INITIAL
-`endif
-`endif // SYNTHESIS
-endmodule
-module uart(
-  input         clock,
-  input         reset,
-  output        io_request_ready,
-  input         io_request_valid,
-  input  [31:0] io_request_bits_addrRequest,
-  input  [31:0] io_request_bits_dataRequest,
-  input         io_request_bits_isWrite,
-  output        io_response_valid,
-  output [31:0] io_response_bits_dataResponse,
-  output        io_response_bits_error,
-  input         io_cio_uart_rx_i,
-  output        io_cio_uart_tx_o,
-  output        io_cio_uart_intr_tx_o
-);
-`ifdef RANDOMIZE_REG_INIT
-  reg [31:0] _RAND_0;
-  reg [31:0] _RAND_1;
-  reg [31:0] _RAND_2;
-`endif // RANDOMIZE_REG_INIT
-  wire  uart_top_clock; // @[uart.scala 57:27]
-  wire  uart_top_reset; // @[uart.scala 57:27]
-  wire  uart_top_io_ren; // @[uart.scala 57:27]
-  wire  uart_top_io_we; // @[uart.scala 57:27]
-  wire [31:0] uart_top_io_wdata; // @[uart.scala 57:27]
-  wire [7:0] uart_top_io_addr; // @[uart.scala 57:27]
-  wire  uart_top_io_rx_i; // @[uart.scala 57:27]
-  wire [31:0] uart_top_io_rdata; // @[uart.scala 57:27]
-  wire  uart_top_io_tx_o; // @[uart.scala 57:27]
-  wire  uart_top_io_intr_tx; // @[uart.scala 57:27]
-  wire  _write_register_T = io_request_ready & io_request_valid; // @[Decoupled.scala 40:37]
-  wire  write_register = _write_register_T & io_request_bits_isWrite; // @[uart.scala 64:26]
-  wire  read_register = _write_register_T & ~io_request_bits_isWrite; // @[uart.scala 65:25]
-  reg [31:0] io_response_bits_dataResponse_REG; // @[uart.scala 73:45]
-  reg  io_response_valid_REG; // @[uart.scala 74:33]
-  reg  io_response_bits_error_REG; // @[uart.scala 75:38]
-  UartTOP uart_top ( // @[uart.scala 57:27]
-    .clock(uart_top_clock),
-    .reset(uart_top_reset),
-    .io_ren(uart_top_io_ren),
-    .io_we(uart_top_io_we),
-    .io_wdata(uart_top_io_wdata),
-    .io_addr(uart_top_io_addr),
-    .io_rx_i(uart_top_io_rx_i),
-    .io_rdata(uart_top_io_rdata),
-    .io_tx_o(uart_top_io_tx_o),
-    .io_intr_tx(uart_top_io_intr_tx)
-  );
-  assign io_request_ready = 1'h1; // @[uart.scala 19:22]
-  assign io_response_valid = io_response_valid_REG; // @[uart.scala 74:23]
-  assign io_response_bits_dataResponse = io_response_bits_dataResponse_REG; // @[uart.scala 73:35]
-  assign io_response_bits_error = io_response_bits_error_REG; // @[uart.scala 75:28]
-  assign io_cio_uart_tx_o = uart_top_io_tx_o; // @[uart.scala 78:22]
-  assign io_cio_uart_intr_tx_o = uart_top_io_intr_tx; // @[uart.scala 77:27]
-  assign uart_top_clock = clock;
-  assign uart_top_reset = reset;
-  assign uart_top_io_ren = _write_register_T & ~io_request_bits_isWrite; // @[uart.scala 65:25]
-  assign uart_top_io_we = _write_register_T & io_request_bits_isWrite; // @[uart.scala 64:26]
-  assign uart_top_io_wdata = io_request_bits_dataRequest; // @[uart.scala 61:24 uart.scala 66:14]
-  assign uart_top_io_addr = io_request_bits_addrRequest[7:0]; // @[uart.scala 67:44]
-  assign uart_top_io_rx_i = io_cio_uart_rx_i; // @[uart.scala 79:22]
-  always @(posedge clock) begin
-    io_response_bits_dataResponse_REG <= uart_top_io_rdata; // @[uart.scala 73:49]
-    io_response_valid_REG <= write_register | read_register; // @[uart.scala 74:53]
-    io_response_bits_error_REG <= uart_top_io_intr_tx; // @[uart.scala 75:42]
-  end
-// Register and memory initialization
-`ifdef RANDOMIZE_GARBAGE_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_INVALID_ASSIGN
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_REG_INIT
-`define RANDOMIZE
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-`define RANDOMIZE
-`endif
-`ifndef RANDOM
-`define RANDOM $random
-`endif
-`ifdef RANDOMIZE_MEM_INIT
-  integer initvar;
-`endif
-`ifndef SYNTHESIS
-`ifdef FIRRTL_BEFORE_INITIAL
-`FIRRTL_BEFORE_INITIAL
-`endif
-initial begin
-  `ifdef RANDOMIZE
-    `ifdef INIT_RANDOM
-      `INIT_RANDOM
-    `endif
-    `ifndef VERILATOR
-      `ifdef RANDOMIZE_DELAY
-        #`RANDOMIZE_DELAY begin end
-      `else
-        #0.002 begin end
-      `endif
-    `endif
-`ifdef RANDOMIZE_REG_INIT
-  _RAND_0 = {1{`RANDOM}};
-  io_response_bits_dataResponse_REG = _RAND_0[31:0];
-  _RAND_1 = {1{`RANDOM}};
-  io_response_valid_REG = _RAND_1[0:0];
-  _RAND_2 = {1{`RANDOM}};
-  io_response_bits_error_REG = _RAND_2[0:0];
-`endif // RANDOMIZE_REG_INIT
-  `endif // RANDOMIZE
-end // initial
-`ifdef FIRRTL_AFTER_INITIAL
-`FIRRTL_AFTER_INITIAL
-`endif
-`endif // SYNTHESIS
-endmodule
 module BlockRamWithoutMasking(
   input         clock,
   input         reset,
@@ -4124,38 +3459,24 @@ module Switch1toN(
   output        io_devOut_2_valid,
   output        io_devOut_2_bits_cyc,
   output        io_devOut_2_bits_stb,
-  output        io_devOut_2_bits_we,
-  output [31:0] io_devOut_2_bits_adr,
-  output [31:0] io_devOut_2_bits_dat,
-  output [3:0]  io_devOut_2_bits_sel,
-  output        io_devOut_3_valid,
-  output        io_devOut_3_bits_cyc,
-  output        io_devOut_3_bits_stb,
   input         io_devIn_0_bits_ack,
   input  [31:0] io_devIn_0_bits_dat,
   input         io_devIn_0_bits_err,
   input         io_devIn_1_bits_ack,
   input  [31:0] io_devIn_1_bits_dat,
   input         io_devIn_1_bits_err,
-  input         io_devIn_2_bits_ack,
   input  [31:0] io_devIn_2_bits_dat,
   input         io_devIn_2_bits_err,
-  input  [31:0] io_devIn_3_bits_dat,
-  input         io_devIn_3_bits_err,
   input  [1:0]  io_devSel
 );
   wire  _io_devOut_0_valid_T = io_devSel == 2'h0; // @[Switch1toN.scala 33:57]
   wire  _io_devOut_1_valid_T = io_devSel == 2'h1; // @[Switch1toN.scala 33:57]
-  wire  _io_devOut_2_valid_T = io_devSel == 2'h2; // @[Switch1toN.scala 33:57]
-  wire  _GEN_0 = _io_devOut_0_valid_T ? io_devIn_0_bits_err : io_devIn_3_bits_err; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23 Switch1toN.scala 27:19]
-  wire [31:0] _GEN_1 = _io_devOut_0_valid_T ? io_devIn_0_bits_dat : io_devIn_3_bits_dat; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23 Switch1toN.scala 27:19]
+  wire  _GEN_0 = _io_devOut_0_valid_T ? io_devIn_0_bits_err : io_devIn_2_bits_err; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23 Switch1toN.scala 27:19]
+  wire [31:0] _GEN_1 = _io_devOut_0_valid_T ? io_devIn_0_bits_dat : io_devIn_2_bits_dat; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23 Switch1toN.scala 27:19]
   wire  _GEN_2 = _io_devOut_0_valid_T & io_devIn_0_bits_ack; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23 Switch1toN.scala 27:19]
-  wire  _GEN_4 = _io_devOut_1_valid_T ? io_devIn_1_bits_err : _GEN_0; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
-  wire [31:0] _GEN_5 = _io_devOut_1_valid_T ? io_devIn_1_bits_dat : _GEN_1; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
-  wire  _GEN_6 = _io_devOut_1_valid_T ? io_devIn_1_bits_ack : _GEN_2; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
-  assign io_hostOut_bits_ack = _io_devOut_2_valid_T ? io_devIn_2_bits_ack : _GEN_6; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
-  assign io_hostOut_bits_dat = _io_devOut_2_valid_T ? io_devIn_2_bits_dat : _GEN_5; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
-  assign io_hostOut_bits_err = _io_devOut_2_valid_T ? io_devIn_2_bits_err : _GEN_4; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
+  assign io_hostOut_bits_ack = _io_devOut_1_valid_T ? io_devIn_1_bits_ack : _GEN_2; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
+  assign io_hostOut_bits_dat = _io_devOut_1_valid_T ? io_devIn_1_bits_dat : _GEN_1; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
+  assign io_hostOut_bits_err = _io_devOut_1_valid_T ? io_devIn_1_bits_err : _GEN_0; // @[Switch1toN.scala 39:35 Switch1toN.scala 40:23]
   assign io_devOut_0_valid = io_hostIn_valid & io_devSel == 2'h0; // @[Switch1toN.scala 33:43]
   assign io_devOut_0_bits_cyc = io_hostIn_bits_cyc; // @[Switch1toN.scala 31:33]
   assign io_devOut_0_bits_stb = io_hostIn_bits_stb; // @[Switch1toN.scala 31:33]
@@ -4170,271 +3491,215 @@ module Switch1toN(
   assign io_devOut_1_bits_adr = io_hostIn_bits_adr; // @[Switch1toN.scala 31:33]
   assign io_devOut_1_bits_dat = io_hostIn_bits_dat; // @[Switch1toN.scala 31:33]
   assign io_devOut_1_bits_sel = io_hostIn_bits_sel; // @[Switch1toN.scala 31:33]
-  assign io_devOut_2_valid = io_hostIn_valid & io_devSel == 2'h2; // @[Switch1toN.scala 33:43]
+  assign io_devOut_2_valid = io_hostIn_valid & io_devSel == 2'h2; // @[Switch1toN.scala 23:41]
   assign io_devOut_2_bits_cyc = io_hostIn_bits_cyc; // @[Switch1toN.scala 31:33]
   assign io_devOut_2_bits_stb = io_hostIn_bits_stb; // @[Switch1toN.scala 31:33]
-  assign io_devOut_2_bits_we = io_hostIn_bits_we; // @[Switch1toN.scala 31:33]
-  assign io_devOut_2_bits_adr = io_hostIn_bits_adr; // @[Switch1toN.scala 31:33]
-  assign io_devOut_2_bits_dat = io_hostIn_bits_dat; // @[Switch1toN.scala 31:33]
-  assign io_devOut_2_bits_sel = io_hostIn_bits_sel; // @[Switch1toN.scala 31:33]
-  assign io_devOut_3_valid = io_hostIn_valid & io_devSel == 2'h3; // @[Switch1toN.scala 23:41]
-  assign io_devOut_3_bits_cyc = io_hostIn_bits_cyc; // @[Switch1toN.scala 31:33]
-  assign io_devOut_3_bits_stb = io_hostIn_bits_stb; // @[Switch1toN.scala 31:33]
 endmodule
-module GeneratorWB(
+module Generator(
   input        clock,
   input        reset,
-  input        io_cio_uart_rx_i,
-  output       io_cio_uart_tx_o,
-  output       io_cio_uart_intr_tx_o,
-  output [7:0] io_gpio_o,
-  output [7:0] io_gpio_en_o,
-  input  [7:0] io_gpio_i
+  output [3:0] io_gpio_o,
+  output [3:0] io_gpio_en_o,
+  input  [3:0] io_gpio_i
 );
-  wire  gen_imem_host_clock; // @[Generator.scala 229:29]
-  wire  gen_imem_host_reset; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbMasterTransmitter_ready; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 229:29]
-  wire [31:0] gen_imem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 229:29]
-  wire [31:0] gen_imem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 229:29]
-  wire [3:0] gen_imem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbSlaveReceiver_ready; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbSlaveReceiver_bits_ack; // @[Generator.scala 229:29]
-  wire [31:0] gen_imem_host_io_wbSlaveReceiver_bits_dat; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_wbSlaveReceiver_bits_err; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_reqIn_ready; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_reqIn_valid; // @[Generator.scala 229:29]
-  wire [31:0] gen_imem_host_io_reqIn_bits_addrRequest; // @[Generator.scala 229:29]
-  wire [31:0] gen_imem_host_io_reqIn_bits_dataRequest; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_reqIn_bits_isWrite; // @[Generator.scala 229:29]
-  wire  gen_imem_host_io_rspOut_valid; // @[Generator.scala 229:29]
-  wire [31:0] gen_imem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 229:29]
-  wire  gen_imem_slave_io_wbSlaveTransmitter_ready; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 230:30]
-  wire [31:0] gen_imem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_wbMasterReceiver_ready; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_wbMasterReceiver_valid; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_wbMasterReceiver_bits_stb; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_wbMasterReceiver_bits_we; // @[Generator.scala 230:30]
-  wire [31:0] gen_imem_slave_io_wbMasterReceiver_bits_adr; // @[Generator.scala 230:30]
-  wire [31:0] gen_imem_slave_io_wbMasterReceiver_bits_dat; // @[Generator.scala 230:30]
-  wire [3:0] gen_imem_slave_io_wbMasterReceiver_bits_sel; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_reqOut_valid; // @[Generator.scala 230:30]
-  wire [31:0] gen_imem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 230:30]
-  wire [31:0] gen_imem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 230:30]
-  wire [3:0] gen_imem_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_rspIn_valid; // @[Generator.scala 230:30]
-  wire [31:0] gen_imem_slave_io_rspIn_bits_dataResponse; // @[Generator.scala 230:30]
-  wire  gen_imem_slave_io_rspIn_bits_error; // @[Generator.scala 230:30]
-  wire  gen_dmem_host_clock; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_reset; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbMasterTransmitter_ready; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 231:29]
-  wire [31:0] gen_dmem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 231:29]
-  wire [31:0] gen_dmem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 231:29]
-  wire [3:0] gen_dmem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbSlaveReceiver_ready; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbSlaveReceiver_bits_ack; // @[Generator.scala 231:29]
-  wire [31:0] gen_dmem_host_io_wbSlaveReceiver_bits_dat; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_wbSlaveReceiver_bits_err; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_reqIn_ready; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_reqIn_valid; // @[Generator.scala 231:29]
-  wire [31:0] gen_dmem_host_io_reqIn_bits_addrRequest; // @[Generator.scala 231:29]
-  wire [31:0] gen_dmem_host_io_reqIn_bits_dataRequest; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_reqIn_bits_isWrite; // @[Generator.scala 231:29]
-  wire  gen_dmem_host_io_rspOut_valid; // @[Generator.scala 231:29]
-  wire [31:0] gen_dmem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 231:29]
-  wire  gen_dmem_slave_io_wbSlaveTransmitter_ready; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 232:30]
-  wire [31:0] gen_dmem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_wbMasterReceiver_ready; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_wbMasterReceiver_valid; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_wbMasterReceiver_bits_stb; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_wbMasterReceiver_bits_we; // @[Generator.scala 232:30]
-  wire [31:0] gen_dmem_slave_io_wbMasterReceiver_bits_adr; // @[Generator.scala 232:30]
-  wire [31:0] gen_dmem_slave_io_wbMasterReceiver_bits_dat; // @[Generator.scala 232:30]
-  wire [3:0] gen_dmem_slave_io_wbMasterReceiver_bits_sel; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_reqOut_valid; // @[Generator.scala 232:30]
-  wire [31:0] gen_dmem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 232:30]
-  wire [31:0] gen_dmem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 232:30]
-  wire [3:0] gen_dmem_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_rspIn_valid; // @[Generator.scala 232:30]
-  wire [31:0] gen_dmem_slave_io_rspIn_bits_dataResponse; // @[Generator.scala 232:30]
-  wire  gen_dmem_slave_io_rspIn_bits_error; // @[Generator.scala 232:30]
-  wire  gpio_clock; // @[Generator.scala 236:20]
-  wire  gpio_reset; // @[Generator.scala 236:20]
-  wire  gpio_io_req_valid; // @[Generator.scala 236:20]
-  wire [31:0] gpio_io_req_bits_addrRequest; // @[Generator.scala 236:20]
-  wire [31:0] gpio_io_req_bits_dataRequest; // @[Generator.scala 236:20]
-  wire [3:0] gpio_io_req_bits_activeByteLane; // @[Generator.scala 236:20]
-  wire  gpio_io_req_bits_isWrite; // @[Generator.scala 236:20]
-  wire  gpio_io_rsp_valid; // @[Generator.scala 236:20]
-  wire [31:0] gpio_io_rsp_bits_dataResponse; // @[Generator.scala 236:20]
-  wire  gpio_io_rsp_bits_error; // @[Generator.scala 236:20]
-  wire [31:0] gpio_io_cio_gpio_i; // @[Generator.scala 236:20]
-  wire [31:0] gpio_io_cio_gpio_o; // @[Generator.scala 236:20]
-  wire [31:0] gpio_io_cio_gpio_en_o; // @[Generator.scala 236:20]
-  wire  gen_gpio_slave_io_wbSlaveTransmitter_ready; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 237:30]
-  wire [31:0] gen_gpio_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_wbMasterReceiver_ready; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_wbMasterReceiver_valid; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_wbMasterReceiver_bits_stb; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_wbMasterReceiver_bits_we; // @[Generator.scala 237:30]
-  wire [31:0] gen_gpio_slave_io_wbMasterReceiver_bits_adr; // @[Generator.scala 237:30]
-  wire [31:0] gen_gpio_slave_io_wbMasterReceiver_bits_dat; // @[Generator.scala 237:30]
-  wire [3:0] gen_gpio_slave_io_wbMasterReceiver_bits_sel; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_reqOut_valid; // @[Generator.scala 237:30]
-  wire [31:0] gen_gpio_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 237:30]
-  wire [31:0] gen_gpio_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 237:30]
-  wire [3:0] gen_gpio_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_reqOut_bits_isWrite; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_rspIn_valid; // @[Generator.scala 237:30]
-  wire [31:0] gen_gpio_slave_io_rspIn_bits_dataResponse; // @[Generator.scala 237:30]
-  wire  gen_gpio_slave_io_rspIn_bits_error; // @[Generator.scala 237:30]
-  wire  uart_clock; // @[Generator.scala 271:20]
-  wire  uart_reset; // @[Generator.scala 271:20]
-  wire  uart_io_request_ready; // @[Generator.scala 271:20]
-  wire  uart_io_request_valid; // @[Generator.scala 271:20]
-  wire [31:0] uart_io_request_bits_addrRequest; // @[Generator.scala 271:20]
-  wire [31:0] uart_io_request_bits_dataRequest; // @[Generator.scala 271:20]
-  wire  uart_io_request_bits_isWrite; // @[Generator.scala 271:20]
-  wire  uart_io_response_valid; // @[Generator.scala 271:20]
-  wire [31:0] uart_io_response_bits_dataResponse; // @[Generator.scala 271:20]
-  wire  uart_io_response_bits_error; // @[Generator.scala 271:20]
-  wire  uart_io_cio_uart_rx_i; // @[Generator.scala 271:20]
-  wire  uart_io_cio_uart_tx_o; // @[Generator.scala 271:20]
-  wire  uart_io_cio_uart_intr_tx_o; // @[Generator.scala 271:20]
-  wire  slaves_2_io_wbSlaveTransmitter_ready; // @[Generator.scala 273:30]
-  wire  slaves_2_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 273:30]
-  wire [31:0] slaves_2_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 273:30]
-  wire  slaves_2_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 273:30]
-  wire  slaves_2_io_wbMasterReceiver_ready; // @[Generator.scala 273:30]
-  wire  slaves_2_io_wbMasterReceiver_valid; // @[Generator.scala 273:30]
-  wire  slaves_2_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 273:30]
-  wire  slaves_2_io_wbMasterReceiver_bits_stb; // @[Generator.scala 273:30]
-  wire  slaves_2_io_wbMasterReceiver_bits_we; // @[Generator.scala 273:30]
-  wire [31:0] slaves_2_io_wbMasterReceiver_bits_adr; // @[Generator.scala 273:30]
-  wire [31:0] slaves_2_io_wbMasterReceiver_bits_dat; // @[Generator.scala 273:30]
-  wire [3:0] slaves_2_io_wbMasterReceiver_bits_sel; // @[Generator.scala 273:30]
-  wire  slaves_2_io_reqOut_valid; // @[Generator.scala 273:30]
-  wire [31:0] slaves_2_io_reqOut_bits_addrRequest; // @[Generator.scala 273:30]
-  wire [31:0] slaves_2_io_reqOut_bits_dataRequest; // @[Generator.scala 273:30]
-  wire [3:0] slaves_2_io_reqOut_bits_activeByteLane; // @[Generator.scala 273:30]
-  wire  slaves_2_io_reqOut_bits_isWrite; // @[Generator.scala 273:30]
-  wire  slaves_2_io_rspIn_valid; // @[Generator.scala 273:30]
-  wire [31:0] slaves_2_io_rspIn_bits_dataResponse; // @[Generator.scala 273:30]
-  wire  slaves_2_io_rspIn_bits_error; // @[Generator.scala 273:30]
-  wire  imem_clock; // @[Generator.scala 378:20]
-  wire  imem_reset; // @[Generator.scala 378:20]
-  wire  imem_io_req_ready; // @[Generator.scala 378:20]
-  wire  imem_io_req_valid; // @[Generator.scala 378:20]
-  wire [31:0] imem_io_req_bits_addrRequest; // @[Generator.scala 378:20]
-  wire [31:0] imem_io_req_bits_dataRequest; // @[Generator.scala 378:20]
-  wire  imem_io_req_bits_isWrite; // @[Generator.scala 378:20]
-  wire  imem_io_rsp_valid; // @[Generator.scala 378:20]
-  wire [31:0] imem_io_rsp_bits_dataResponse; // @[Generator.scala 378:20]
-  wire  imem_io_rsp_bits_error; // @[Generator.scala 378:20]
-  wire  dmem_clock; // @[Generator.scala 379:20]
-  wire  dmem_reset; // @[Generator.scala 379:20]
-  wire  dmem_io_req_ready; // @[Generator.scala 379:20]
-  wire  dmem_io_req_valid; // @[Generator.scala 379:20]
-  wire [31:0] dmem_io_req_bits_addrRequest; // @[Generator.scala 379:20]
-  wire [31:0] dmem_io_req_bits_dataRequest; // @[Generator.scala 379:20]
-  wire [3:0] dmem_io_req_bits_activeByteLane; // @[Generator.scala 379:20]
-  wire  dmem_io_req_bits_isWrite; // @[Generator.scala 379:20]
-  wire  dmem_io_rsp_valid; // @[Generator.scala 379:20]
-  wire [31:0] dmem_io_rsp_bits_dataResponse; // @[Generator.scala 379:20]
-  wire  wbErr_clock; // @[Generator.scala 381:21]
-  wire  wbErr_reset; // @[Generator.scala 381:21]
-  wire [31:0] wbErr_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 381:21]
-  wire  wbErr_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 381:21]
-  wire  wbErr_io_wbMasterReceiver_valid; // @[Generator.scala 381:21]
-  wire  wbErr_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 381:21]
-  wire  wbErr_io_wbMasterReceiver_bits_stb; // @[Generator.scala 381:21]
-  wire  core_clock; // @[Generator.scala 382:20]
-  wire  core_reset; // @[Generator.scala 382:20]
-  wire  core_io_dmemReq_valid; // @[Generator.scala 382:20]
-  wire [31:0] core_io_dmemReq_bits_addrRequest; // @[Generator.scala 382:20]
-  wire [31:0] core_io_dmemReq_bits_dataRequest; // @[Generator.scala 382:20]
-  wire  core_io_dmemReq_bits_isWrite; // @[Generator.scala 382:20]
-  wire  core_io_dmemRsp_valid; // @[Generator.scala 382:20]
-  wire [31:0] core_io_dmemRsp_bits_dataResponse; // @[Generator.scala 382:20]
-  wire  core_io_imemReq_ready; // @[Generator.scala 382:20]
-  wire  core_io_imemReq_valid; // @[Generator.scala 382:20]
-  wire [31:0] core_io_imemReq_bits_addrRequest; // @[Generator.scala 382:20]
-  wire  core_io_imemRsp_valid; // @[Generator.scala 382:20]
-  wire [31:0] core_io_imemRsp_bits_dataResponse; // @[Generator.scala 382:20]
-  wire  switch_io_hostIn_valid; // @[Generator.scala 395:22]
-  wire  switch_io_hostIn_bits_cyc; // @[Generator.scala 395:22]
-  wire  switch_io_hostIn_bits_stb; // @[Generator.scala 395:22]
-  wire  switch_io_hostIn_bits_we; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_hostIn_bits_adr; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_hostIn_bits_dat; // @[Generator.scala 395:22]
-  wire [3:0] switch_io_hostIn_bits_sel; // @[Generator.scala 395:22]
-  wire  switch_io_hostOut_bits_ack; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_hostOut_bits_dat; // @[Generator.scala 395:22]
-  wire  switch_io_hostOut_bits_err; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_0_valid; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_0_bits_cyc; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_0_bits_stb; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_0_bits_we; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devOut_0_bits_adr; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devOut_0_bits_dat; // @[Generator.scala 395:22]
-  wire [3:0] switch_io_devOut_0_bits_sel; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_1_valid; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_1_bits_cyc; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_1_bits_stb; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_1_bits_we; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devOut_1_bits_adr; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devOut_1_bits_dat; // @[Generator.scala 395:22]
-  wire [3:0] switch_io_devOut_1_bits_sel; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_2_valid; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_2_bits_cyc; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_2_bits_stb; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_2_bits_we; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devOut_2_bits_adr; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devOut_2_bits_dat; // @[Generator.scala 395:22]
-  wire [3:0] switch_io_devOut_2_bits_sel; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_3_valid; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_3_bits_cyc; // @[Generator.scala 395:22]
-  wire  switch_io_devOut_3_bits_stb; // @[Generator.scala 395:22]
-  wire  switch_io_devIn_0_bits_ack; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devIn_0_bits_dat; // @[Generator.scala 395:22]
-  wire  switch_io_devIn_0_bits_err; // @[Generator.scala 395:22]
-  wire  switch_io_devIn_1_bits_ack; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devIn_1_bits_dat; // @[Generator.scala 395:22]
-  wire  switch_io_devIn_1_bits_err; // @[Generator.scala 395:22]
-  wire  switch_io_devIn_2_bits_ack; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devIn_2_bits_dat; // @[Generator.scala 395:22]
-  wire  switch_io_devIn_2_bits_err; // @[Generator.scala 395:22]
-  wire [31:0] switch_io_devIn_3_bits_dat; // @[Generator.scala 395:22]
-  wire  switch_io_devIn_3_bits_err; // @[Generator.scala 395:22]
-  wire [1:0] switch_io_devSel; // @[Generator.scala 395:22]
+  wire  gen_imem_host_clock; // @[Generator.scala 122:31]
+  wire  gen_imem_host_reset; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbMasterTransmitter_ready; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 122:31]
+  wire [31:0] gen_imem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 122:31]
+  wire [31:0] gen_imem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 122:31]
+  wire [3:0] gen_imem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbSlaveReceiver_ready; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbSlaveReceiver_bits_ack; // @[Generator.scala 122:31]
+  wire [31:0] gen_imem_host_io_wbSlaveReceiver_bits_dat; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_wbSlaveReceiver_bits_err; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_reqIn_ready; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_reqIn_valid; // @[Generator.scala 122:31]
+  wire [31:0] gen_imem_host_io_reqIn_bits_addrRequest; // @[Generator.scala 122:31]
+  wire [31:0] gen_imem_host_io_reqIn_bits_dataRequest; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_reqIn_bits_isWrite; // @[Generator.scala 122:31]
+  wire  gen_imem_host_io_rspOut_valid; // @[Generator.scala 122:31]
+  wire [31:0] gen_imem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 122:31]
+  wire  gen_imem_slave_io_wbSlaveTransmitter_ready; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 123:32]
+  wire [31:0] gen_imem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_wbMasterReceiver_ready; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_wbMasterReceiver_valid; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_wbMasterReceiver_bits_stb; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_wbMasterReceiver_bits_we; // @[Generator.scala 123:32]
+  wire [31:0] gen_imem_slave_io_wbMasterReceiver_bits_adr; // @[Generator.scala 123:32]
+  wire [31:0] gen_imem_slave_io_wbMasterReceiver_bits_dat; // @[Generator.scala 123:32]
+  wire [3:0] gen_imem_slave_io_wbMasterReceiver_bits_sel; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_reqOut_valid; // @[Generator.scala 123:32]
+  wire [31:0] gen_imem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 123:32]
+  wire [31:0] gen_imem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 123:32]
+  wire [3:0] gen_imem_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_rspIn_valid; // @[Generator.scala 123:32]
+  wire [31:0] gen_imem_slave_io_rspIn_bits_dataResponse; // @[Generator.scala 123:32]
+  wire  gen_imem_slave_io_rspIn_bits_error; // @[Generator.scala 123:32]
+  wire  gen_dmem_host_clock; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_reset; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbMasterTransmitter_ready; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 124:31]
+  wire [31:0] gen_dmem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 124:31]
+  wire [31:0] gen_dmem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 124:31]
+  wire [3:0] gen_dmem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbSlaveReceiver_ready; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbSlaveReceiver_bits_ack; // @[Generator.scala 124:31]
+  wire [31:0] gen_dmem_host_io_wbSlaveReceiver_bits_dat; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_wbSlaveReceiver_bits_err; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_reqIn_ready; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_reqIn_valid; // @[Generator.scala 124:31]
+  wire [31:0] gen_dmem_host_io_reqIn_bits_addrRequest; // @[Generator.scala 124:31]
+  wire [31:0] gen_dmem_host_io_reqIn_bits_dataRequest; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_reqIn_bits_isWrite; // @[Generator.scala 124:31]
+  wire  gen_dmem_host_io_rspOut_valid; // @[Generator.scala 124:31]
+  wire [31:0] gen_dmem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 124:31]
+  wire  gen_dmem_slave_io_wbSlaveTransmitter_ready; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 125:32]
+  wire [31:0] gen_dmem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_wbMasterReceiver_ready; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_wbMasterReceiver_valid; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_wbMasterReceiver_bits_stb; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_wbMasterReceiver_bits_we; // @[Generator.scala 125:32]
+  wire [31:0] gen_dmem_slave_io_wbMasterReceiver_bits_adr; // @[Generator.scala 125:32]
+  wire [31:0] gen_dmem_slave_io_wbMasterReceiver_bits_dat; // @[Generator.scala 125:32]
+  wire [3:0] gen_dmem_slave_io_wbMasterReceiver_bits_sel; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_reqOut_valid; // @[Generator.scala 125:32]
+  wire [31:0] gen_dmem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 125:32]
+  wire [31:0] gen_dmem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 125:32]
+  wire [3:0] gen_dmem_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_rspIn_valid; // @[Generator.scala 125:32]
+  wire [31:0] gen_dmem_slave_io_rspIn_bits_dataResponse; // @[Generator.scala 125:32]
+  wire  gen_dmem_slave_io_rspIn_bits_error; // @[Generator.scala 125:32]
+  wire  gpio_clock; // @[Generator.scala 133:26]
+  wire  gpio_reset; // @[Generator.scala 133:26]
+  wire  gpio_io_req_valid; // @[Generator.scala 133:26]
+  wire [31:0] gpio_io_req_bits_addrRequest; // @[Generator.scala 133:26]
+  wire [31:0] gpio_io_req_bits_dataRequest; // @[Generator.scala 133:26]
+  wire [3:0] gpio_io_req_bits_activeByteLane; // @[Generator.scala 133:26]
+  wire  gpio_io_req_bits_isWrite; // @[Generator.scala 133:26]
+  wire  gpio_io_rsp_valid; // @[Generator.scala 133:26]
+  wire [31:0] gpio_io_rsp_bits_dataResponse; // @[Generator.scala 133:26]
+  wire  gpio_io_rsp_bits_error; // @[Generator.scala 133:26]
+  wire [31:0] gpio_io_cio_gpio_i; // @[Generator.scala 133:26]
+  wire [31:0] gpio_io_cio_gpio_o; // @[Generator.scala 133:26]
+  wire [31:0] gpio_io_cio_gpio_en_o; // @[Generator.scala 133:26]
+  wire  gen_gpio_slave_io_wbSlaveTransmitter_ready; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 134:36]
+  wire [31:0] gen_gpio_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_wbMasterReceiver_ready; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_wbMasterReceiver_valid; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_wbMasterReceiver_bits_stb; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_wbMasterReceiver_bits_we; // @[Generator.scala 134:36]
+  wire [31:0] gen_gpio_slave_io_wbMasterReceiver_bits_adr; // @[Generator.scala 134:36]
+  wire [31:0] gen_gpio_slave_io_wbMasterReceiver_bits_dat; // @[Generator.scala 134:36]
+  wire [3:0] gen_gpio_slave_io_wbMasterReceiver_bits_sel; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_reqOut_valid; // @[Generator.scala 134:36]
+  wire [31:0] gen_gpio_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 134:36]
+  wire [31:0] gen_gpio_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 134:36]
+  wire [3:0] gen_gpio_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_reqOut_bits_isWrite; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_rspIn_valid; // @[Generator.scala 134:36]
+  wire [31:0] gen_gpio_slave_io_rspIn_bits_dataResponse; // @[Generator.scala 134:36]
+  wire  gen_gpio_slave_io_rspIn_bits_error; // @[Generator.scala 134:36]
+  wire  imem_clock; // @[Generator.scala 215:22]
+  wire  imem_reset; // @[Generator.scala 215:22]
+  wire  imem_io_req_ready; // @[Generator.scala 215:22]
+  wire  imem_io_req_valid; // @[Generator.scala 215:22]
+  wire [31:0] imem_io_req_bits_addrRequest; // @[Generator.scala 215:22]
+  wire [31:0] imem_io_req_bits_dataRequest; // @[Generator.scala 215:22]
+  wire  imem_io_req_bits_isWrite; // @[Generator.scala 215:22]
+  wire  imem_io_rsp_valid; // @[Generator.scala 215:22]
+  wire [31:0] imem_io_rsp_bits_dataResponse; // @[Generator.scala 215:22]
+  wire  imem_io_rsp_bits_error; // @[Generator.scala 215:22]
+  wire  dmem_clock; // @[Generator.scala 216:22]
+  wire  dmem_reset; // @[Generator.scala 216:22]
+  wire  dmem_io_req_ready; // @[Generator.scala 216:22]
+  wire  dmem_io_req_valid; // @[Generator.scala 216:22]
+  wire [31:0] dmem_io_req_bits_addrRequest; // @[Generator.scala 216:22]
+  wire [31:0] dmem_io_req_bits_dataRequest; // @[Generator.scala 216:22]
+  wire [3:0] dmem_io_req_bits_activeByteLane; // @[Generator.scala 216:22]
+  wire  dmem_io_req_bits_isWrite; // @[Generator.scala 216:22]
+  wire  dmem_io_rsp_valid; // @[Generator.scala 216:22]
+  wire [31:0] dmem_io_rsp_bits_dataResponse; // @[Generator.scala 216:22]
+  wire  wbErr_clock; // @[Generator.scala 218:23]
+  wire  wbErr_reset; // @[Generator.scala 218:23]
+  wire [31:0] wbErr_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 218:23]
+  wire  wbErr_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 218:23]
+  wire  wbErr_io_wbMasterReceiver_valid; // @[Generator.scala 218:23]
+  wire  wbErr_io_wbMasterReceiver_bits_cyc; // @[Generator.scala 218:23]
+  wire  wbErr_io_wbMasterReceiver_bits_stb; // @[Generator.scala 218:23]
+  wire  core_clock; // @[Generator.scala 219:22]
+  wire  core_reset; // @[Generator.scala 219:22]
+  wire  core_io_dmemReq_valid; // @[Generator.scala 219:22]
+  wire [31:0] core_io_dmemReq_bits_addrRequest; // @[Generator.scala 219:22]
+  wire [31:0] core_io_dmemReq_bits_dataRequest; // @[Generator.scala 219:22]
+  wire  core_io_dmemReq_bits_isWrite; // @[Generator.scala 219:22]
+  wire  core_io_dmemRsp_valid; // @[Generator.scala 219:22]
+  wire [31:0] core_io_dmemRsp_bits_dataResponse; // @[Generator.scala 219:22]
+  wire  core_io_imemReq_ready; // @[Generator.scala 219:22]
+  wire  core_io_imemReq_valid; // @[Generator.scala 219:22]
+  wire [31:0] core_io_imemReq_bits_addrRequest; // @[Generator.scala 219:22]
+  wire  core_io_imemRsp_valid; // @[Generator.scala 219:22]
+  wire [31:0] core_io_imemRsp_bits_dataResponse; // @[Generator.scala 219:22]
+  wire  switch_io_hostIn_valid; // @[Generator.scala 224:24]
+  wire  switch_io_hostIn_bits_cyc; // @[Generator.scala 224:24]
+  wire  switch_io_hostIn_bits_stb; // @[Generator.scala 224:24]
+  wire  switch_io_hostIn_bits_we; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_hostIn_bits_adr; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_hostIn_bits_dat; // @[Generator.scala 224:24]
+  wire [3:0] switch_io_hostIn_bits_sel; // @[Generator.scala 224:24]
+  wire  switch_io_hostOut_bits_ack; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_hostOut_bits_dat; // @[Generator.scala 224:24]
+  wire  switch_io_hostOut_bits_err; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_0_valid; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_0_bits_cyc; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_0_bits_stb; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_0_bits_we; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_devOut_0_bits_adr; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_devOut_0_bits_dat; // @[Generator.scala 224:24]
+  wire [3:0] switch_io_devOut_0_bits_sel; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_1_valid; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_1_bits_cyc; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_1_bits_stb; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_1_bits_we; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_devOut_1_bits_adr; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_devOut_1_bits_dat; // @[Generator.scala 224:24]
+  wire [3:0] switch_io_devOut_1_bits_sel; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_2_valid; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_2_bits_cyc; // @[Generator.scala 224:24]
+  wire  switch_io_devOut_2_bits_stb; // @[Generator.scala 224:24]
+  wire  switch_io_devIn_0_bits_ack; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_devIn_0_bits_dat; // @[Generator.scala 224:24]
+  wire  switch_io_devIn_0_bits_err; // @[Generator.scala 224:24]
+  wire  switch_io_devIn_1_bits_ack; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_devIn_1_bits_dat; // @[Generator.scala 224:24]
+  wire  switch_io_devIn_1_bits_err; // @[Generator.scala 224:24]
+  wire [31:0] switch_io_devIn_2_bits_dat; // @[Generator.scala 224:24]
+  wire  switch_io_devIn_2_bits_err; // @[Generator.scala 224:24]
+  wire [1:0] switch_io_devSel; // @[Generator.scala 224:24]
   wire [31:0] _switch_io_devSel_addr_hit_0_T_1 = 32'hfffff000 & gen_dmem_host_io_wbMasterTransmitter_bits_adr; // @[BusDecoder.scala 45:60]
-  wire  switch_io_devSel_addr_hit_0 = _switch_io_devSel_addr_hit_0_T_1 == 32'h40000000; // @[BusDecoder.scala 45:68]
-  wire [1:0] switch_io_devSel_id_0 = switch_io_devSel_addr_hit_0 ? 2'h0 : 2'h3; // @[BusDecoder.scala 46:19]
-  wire  switch_io_devSel_addr_hit_1 = _switch_io_devSel_addr_hit_0_T_1 == 32'h40002000; // @[BusDecoder.scala 45:68]
-  wire [1:0] switch_io_devSel_id_1 = switch_io_devSel_addr_hit_1 ? 2'h2 : 2'h3; // @[BusDecoder.scala 46:19]
-  wire  switch_io_devSel_addr_hit_2 = _switch_io_devSel_addr_hit_0_T_1 == 32'h40001000; // @[BusDecoder.scala 45:68]
-  wire [1:0] switch_io_devSel_id_2 = switch_io_devSel_addr_hit_2 ? 2'h1 : 2'h3; // @[BusDecoder.scala 46:19]
-  wire [1:0] _switch_io_devSel_T = switch_io_devSel_addr_hit_2 ? switch_io_devSel_id_2 : 2'h3; // @[Mux.scala 98:16]
-  wire [1:0] _switch_io_devSel_T_1 = switch_io_devSel_addr_hit_1 ? switch_io_devSel_id_1 : _switch_io_devSel_T; // @[Mux.scala 98:16]
-  WishboneHost gen_imem_host ( // @[Generator.scala 229:29]
+  wire  switch_io_devSel_addr_hit_0 = _switch_io_devSel_addr_hit_0_T_1 == 32'h40001000; // @[BusDecoder.scala 45:68]
+  wire [1:0] switch_io_devSel_id_0 = switch_io_devSel_addr_hit_0 ? 2'h1 : 2'h2; // @[BusDecoder.scala 46:19]
+  wire  switch_io_devSel_addr_hit_1 = _switch_io_devSel_addr_hit_0_T_1 == 32'h40000000; // @[BusDecoder.scala 45:68]
+  wire [1:0] switch_io_devSel_id_1 = switch_io_devSel_addr_hit_1 ? 2'h0 : 2'h2; // @[BusDecoder.scala 46:19]
+  wire [1:0] _switch_io_devSel_T = switch_io_devSel_addr_hit_1 ? switch_io_devSel_id_1 : 2'h2; // @[Mux.scala 98:16]
+  WishboneHost gen_imem_host ( // @[Generator.scala 122:31]
     .clock(gen_imem_host_clock),
     .reset(gen_imem_host_reset),
     .io_wbMasterTransmitter_ready(gen_imem_host_io_wbMasterTransmitter_ready),
@@ -4457,7 +3722,7 @@ module GeneratorWB(
     .io_rspOut_valid(gen_imem_host_io_rspOut_valid),
     .io_rspOut_bits_dataResponse(gen_imem_host_io_rspOut_bits_dataResponse)
   );
-  WishboneDevice gen_imem_slave ( // @[Generator.scala 230:30]
+  WishboneDevice gen_imem_slave ( // @[Generator.scala 123:32]
     .io_wbSlaveTransmitter_ready(gen_imem_slave_io_wbSlaveTransmitter_ready),
     .io_wbSlaveTransmitter_bits_ack(gen_imem_slave_io_wbSlaveTransmitter_bits_ack),
     .io_wbSlaveTransmitter_bits_dat(gen_imem_slave_io_wbSlaveTransmitter_bits_dat),
@@ -4479,7 +3744,7 @@ module GeneratorWB(
     .io_rspIn_bits_dataResponse(gen_imem_slave_io_rspIn_bits_dataResponse),
     .io_rspIn_bits_error(gen_imem_slave_io_rspIn_bits_error)
   );
-  WishboneHost gen_dmem_host ( // @[Generator.scala 231:29]
+  WishboneHost gen_dmem_host ( // @[Generator.scala 124:31]
     .clock(gen_dmem_host_clock),
     .reset(gen_dmem_host_reset),
     .io_wbMasterTransmitter_ready(gen_dmem_host_io_wbMasterTransmitter_ready),
@@ -4502,7 +3767,7 @@ module GeneratorWB(
     .io_rspOut_valid(gen_dmem_host_io_rspOut_valid),
     .io_rspOut_bits_dataResponse(gen_dmem_host_io_rspOut_bits_dataResponse)
   );
-  WishboneDevice gen_dmem_slave ( // @[Generator.scala 232:30]
+  WishboneDevice gen_dmem_slave ( // @[Generator.scala 125:32]
     .io_wbSlaveTransmitter_ready(gen_dmem_slave_io_wbSlaveTransmitter_ready),
     .io_wbSlaveTransmitter_bits_ack(gen_dmem_slave_io_wbSlaveTransmitter_bits_ack),
     .io_wbSlaveTransmitter_bits_dat(gen_dmem_slave_io_wbSlaveTransmitter_bits_dat),
@@ -4524,7 +3789,7 @@ module GeneratorWB(
     .io_rspIn_bits_dataResponse(gen_dmem_slave_io_rspIn_bits_dataResponse),
     .io_rspIn_bits_error(gen_dmem_slave_io_rspIn_bits_error)
   );
-  Gpio gpio ( // @[Generator.scala 236:20]
+  Gpio gpio ( // @[Generator.scala 133:26]
     .clock(gpio_clock),
     .reset(gpio_reset),
     .io_req_valid(gpio_io_req_valid),
@@ -4539,7 +3804,7 @@ module GeneratorWB(
     .io_cio_gpio_o(gpio_io_cio_gpio_o),
     .io_cio_gpio_en_o(gpio_io_cio_gpio_en_o)
   );
-  WishboneDevice gen_gpio_slave ( // @[Generator.scala 237:30]
+  WishboneDevice gen_gpio_slave ( // @[Generator.scala 134:36]
     .io_wbSlaveTransmitter_ready(gen_gpio_slave_io_wbSlaveTransmitter_ready),
     .io_wbSlaveTransmitter_bits_ack(gen_gpio_slave_io_wbSlaveTransmitter_bits_ack),
     .io_wbSlaveTransmitter_bits_dat(gen_gpio_slave_io_wbSlaveTransmitter_bits_dat),
@@ -4561,44 +3826,7 @@ module GeneratorWB(
     .io_rspIn_bits_dataResponse(gen_gpio_slave_io_rspIn_bits_dataResponse),
     .io_rspIn_bits_error(gen_gpio_slave_io_rspIn_bits_error)
   );
-  uart uart ( // @[Generator.scala 271:20]
-    .clock(uart_clock),
-    .reset(uart_reset),
-    .io_request_ready(uart_io_request_ready),
-    .io_request_valid(uart_io_request_valid),
-    .io_request_bits_addrRequest(uart_io_request_bits_addrRequest),
-    .io_request_bits_dataRequest(uart_io_request_bits_dataRequest),
-    .io_request_bits_isWrite(uart_io_request_bits_isWrite),
-    .io_response_valid(uart_io_response_valid),
-    .io_response_bits_dataResponse(uart_io_response_bits_dataResponse),
-    .io_response_bits_error(uart_io_response_bits_error),
-    .io_cio_uart_rx_i(uart_io_cio_uart_rx_i),
-    .io_cio_uart_tx_o(uart_io_cio_uart_tx_o),
-    .io_cio_uart_intr_tx_o(uart_io_cio_uart_intr_tx_o)
-  );
-  WishboneDevice slaves_2 ( // @[Generator.scala 273:30]
-    .io_wbSlaveTransmitter_ready(slaves_2_io_wbSlaveTransmitter_ready),
-    .io_wbSlaveTransmitter_bits_ack(slaves_2_io_wbSlaveTransmitter_bits_ack),
-    .io_wbSlaveTransmitter_bits_dat(slaves_2_io_wbSlaveTransmitter_bits_dat),
-    .io_wbSlaveTransmitter_bits_err(slaves_2_io_wbSlaveTransmitter_bits_err),
-    .io_wbMasterReceiver_ready(slaves_2_io_wbMasterReceiver_ready),
-    .io_wbMasterReceiver_valid(slaves_2_io_wbMasterReceiver_valid),
-    .io_wbMasterReceiver_bits_cyc(slaves_2_io_wbMasterReceiver_bits_cyc),
-    .io_wbMasterReceiver_bits_stb(slaves_2_io_wbMasterReceiver_bits_stb),
-    .io_wbMasterReceiver_bits_we(slaves_2_io_wbMasterReceiver_bits_we),
-    .io_wbMasterReceiver_bits_adr(slaves_2_io_wbMasterReceiver_bits_adr),
-    .io_wbMasterReceiver_bits_dat(slaves_2_io_wbMasterReceiver_bits_dat),
-    .io_wbMasterReceiver_bits_sel(slaves_2_io_wbMasterReceiver_bits_sel),
-    .io_reqOut_valid(slaves_2_io_reqOut_valid),
-    .io_reqOut_bits_addrRequest(slaves_2_io_reqOut_bits_addrRequest),
-    .io_reqOut_bits_dataRequest(slaves_2_io_reqOut_bits_dataRequest),
-    .io_reqOut_bits_activeByteLane(slaves_2_io_reqOut_bits_activeByteLane),
-    .io_reqOut_bits_isWrite(slaves_2_io_reqOut_bits_isWrite),
-    .io_rspIn_valid(slaves_2_io_rspIn_valid),
-    .io_rspIn_bits_dataResponse(slaves_2_io_rspIn_bits_dataResponse),
-    .io_rspIn_bits_error(slaves_2_io_rspIn_bits_error)
-  );
-  BlockRamWithoutMasking imem ( // @[Generator.scala 378:20]
+  BlockRamWithoutMasking imem ( // @[Generator.scala 215:22]
     .clock(imem_clock),
     .reset(imem_reset),
     .io_req_ready(imem_io_req_ready),
@@ -4610,7 +3838,7 @@ module GeneratorWB(
     .io_rsp_bits_dataResponse(imem_io_rsp_bits_dataResponse),
     .io_rsp_bits_error(imem_io_rsp_bits_error)
   );
-  BlockRamWithMasking dmem ( // @[Generator.scala 379:20]
+  BlockRamWithMasking dmem ( // @[Generator.scala 216:22]
     .clock(dmem_clock),
     .reset(dmem_reset),
     .io_req_ready(dmem_io_req_ready),
@@ -4622,7 +3850,7 @@ module GeneratorWB(
     .io_rsp_valid(dmem_io_rsp_valid),
     .io_rsp_bits_dataResponse(dmem_io_rsp_bits_dataResponse)
   );
-  WishboneErr wbErr ( // @[Generator.scala 381:21]
+  WishboneErr wbErr ( // @[Generator.scala 218:23]
     .clock(wbErr_clock),
     .reset(wbErr_reset),
     .io_wbSlaveTransmitter_bits_dat(wbErr_io_wbSlaveTransmitter_bits_dat),
@@ -4631,7 +3859,7 @@ module GeneratorWB(
     .io_wbMasterReceiver_bits_cyc(wbErr_io_wbMasterReceiver_bits_cyc),
     .io_wbMasterReceiver_bits_stb(wbErr_io_wbMasterReceiver_bits_stb)
   );
-  Core core ( // @[Generator.scala 382:20]
+  Core core ( // @[Generator.scala 219:22]
     .clock(core_clock),
     .reset(core_reset),
     .io_dmemReq_valid(core_io_dmemReq_valid),
@@ -4646,7 +3874,7 @@ module GeneratorWB(
     .io_imemRsp_valid(core_io_imemRsp_valid),
     .io_imemRsp_bits_dataResponse(core_io_imemRsp_bits_dataResponse)
   );
-  Switch1toN switch ( // @[Generator.scala 395:22]
+  Switch1toN switch ( // @[Generator.scala 224:24]
     .io_hostIn_valid(switch_io_hostIn_valid),
     .io_hostIn_bits_cyc(switch_io_hostIn_bits_cyc),
     .io_hostIn_bits_stb(switch_io_hostIn_bits_stb),
@@ -4674,190 +3902,120 @@ module GeneratorWB(
     .io_devOut_2_valid(switch_io_devOut_2_valid),
     .io_devOut_2_bits_cyc(switch_io_devOut_2_bits_cyc),
     .io_devOut_2_bits_stb(switch_io_devOut_2_bits_stb),
-    .io_devOut_2_bits_we(switch_io_devOut_2_bits_we),
-    .io_devOut_2_bits_adr(switch_io_devOut_2_bits_adr),
-    .io_devOut_2_bits_dat(switch_io_devOut_2_bits_dat),
-    .io_devOut_2_bits_sel(switch_io_devOut_2_bits_sel),
-    .io_devOut_3_valid(switch_io_devOut_3_valid),
-    .io_devOut_3_bits_cyc(switch_io_devOut_3_bits_cyc),
-    .io_devOut_3_bits_stb(switch_io_devOut_3_bits_stb),
     .io_devIn_0_bits_ack(switch_io_devIn_0_bits_ack),
     .io_devIn_0_bits_dat(switch_io_devIn_0_bits_dat),
     .io_devIn_0_bits_err(switch_io_devIn_0_bits_err),
     .io_devIn_1_bits_ack(switch_io_devIn_1_bits_ack),
     .io_devIn_1_bits_dat(switch_io_devIn_1_bits_dat),
     .io_devIn_1_bits_err(switch_io_devIn_1_bits_err),
-    .io_devIn_2_bits_ack(switch_io_devIn_2_bits_ack),
     .io_devIn_2_bits_dat(switch_io_devIn_2_bits_dat),
     .io_devIn_2_bits_err(switch_io_devIn_2_bits_err),
-    .io_devIn_3_bits_dat(switch_io_devIn_3_bits_dat),
-    .io_devIn_3_bits_err(switch_io_devIn_3_bits_err),
     .io_devSel(switch_io_devSel)
   );
-  assign io_cio_uart_tx_o = uart_io_cio_uart_tx_o; // @[Generator.scala 279:20]
-  assign io_cio_uart_intr_tx_o = uart_io_cio_uart_intr_tx_o; // @[Generator.scala 280:25]
-  assign io_gpio_o = gpio_io_cio_gpio_o[7:0]; // @[Generator.scala 242:34]
-  assign io_gpio_en_o = gpio_io_cio_gpio_en_o[7:0]; // @[Generator.scala 243:40]
+  assign io_gpio_o = gpio_io_cio_gpio_o[3:0]; // @[Generator.scala 139:44]
+  assign io_gpio_en_o = gpio_io_cio_gpio_en_o[3:0]; // @[Generator.scala 140:50]
   assign gen_imem_host_clock = clock;
   assign gen_imem_host_reset = reset;
-  assign gen_imem_host_io_wbMasterTransmitter_ready = gen_imem_slave_io_wbMasterReceiver_ready; // @[Generator.scala 404:40]
-  assign gen_imem_host_io_wbSlaveReceiver_bits_ack = gen_imem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 405:40]
-  assign gen_imem_host_io_wbSlaveReceiver_bits_dat = gen_imem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 405:40]
-  assign gen_imem_host_io_wbSlaveReceiver_bits_err = gen_imem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 405:40]
-  assign gen_imem_host_io_reqIn_valid = core_io_imemReq_valid; // @[Generator.scala 398:26]
-  assign gen_imem_host_io_reqIn_bits_addrRequest = core_io_imemReq_bits_addrRequest; // @[Generator.scala 398:26]
-  assign gen_imem_host_io_reqIn_bits_dataRequest = 32'h0; // @[Generator.scala 398:26]
-  assign gen_imem_host_io_reqIn_bits_isWrite = 1'h0; // @[Generator.scala 398:26]
-  assign gen_imem_slave_io_wbSlaveTransmitter_ready = gen_imem_host_io_wbSlaveReceiver_ready; // @[Generator.scala 405:40]
-  assign gen_imem_slave_io_wbMasterReceiver_valid = gen_imem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 404:40]
-  assign gen_imem_slave_io_wbMasterReceiver_bits_cyc = gen_imem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 404:40]
-  assign gen_imem_slave_io_wbMasterReceiver_bits_stb = gen_imem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 404:40]
-  assign gen_imem_slave_io_wbMasterReceiver_bits_we = gen_imem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 404:40]
-  assign gen_imem_slave_io_wbMasterReceiver_bits_adr = gen_imem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 404:40]
-  assign gen_imem_slave_io_wbMasterReceiver_bits_dat = gen_imem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 404:40]
-  assign gen_imem_slave_io_wbMasterReceiver_bits_sel = gen_imem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 404:40]
-  assign gen_imem_slave_io_rspIn_valid = imem_io_rsp_valid; // @[Generator.scala 401:27]
-  assign gen_imem_slave_io_rspIn_bits_dataResponse = imem_io_rsp_bits_dataResponse; // @[Generator.scala 401:27]
-  assign gen_imem_slave_io_rspIn_bits_error = imem_io_rsp_bits_error; // @[Generator.scala 401:27]
+  assign gen_imem_host_io_wbMasterTransmitter_ready = gen_imem_slave_io_wbMasterReceiver_ready; // @[Generator.scala 233:42]
+  assign gen_imem_host_io_wbSlaveReceiver_bits_ack = gen_imem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 234:42]
+  assign gen_imem_host_io_wbSlaveReceiver_bits_dat = gen_imem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 234:42]
+  assign gen_imem_host_io_wbSlaveReceiver_bits_err = gen_imem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 234:42]
+  assign gen_imem_host_io_reqIn_valid = core_io_imemReq_valid; // @[Generator.scala 227:28]
+  assign gen_imem_host_io_reqIn_bits_addrRequest = core_io_imemReq_bits_addrRequest; // @[Generator.scala 227:28]
+  assign gen_imem_host_io_reqIn_bits_dataRequest = 32'h0; // @[Generator.scala 227:28]
+  assign gen_imem_host_io_reqIn_bits_isWrite = 1'h0; // @[Generator.scala 227:28]
+  assign gen_imem_slave_io_wbSlaveTransmitter_ready = gen_imem_host_io_wbSlaveReceiver_ready; // @[Generator.scala 234:42]
+  assign gen_imem_slave_io_wbMasterReceiver_valid = gen_imem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 233:42]
+  assign gen_imem_slave_io_wbMasterReceiver_bits_cyc = gen_imem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 233:42]
+  assign gen_imem_slave_io_wbMasterReceiver_bits_stb = gen_imem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 233:42]
+  assign gen_imem_slave_io_wbMasterReceiver_bits_we = gen_imem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 233:42]
+  assign gen_imem_slave_io_wbMasterReceiver_bits_adr = gen_imem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 233:42]
+  assign gen_imem_slave_io_wbMasterReceiver_bits_dat = gen_imem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 233:42]
+  assign gen_imem_slave_io_wbMasterReceiver_bits_sel = gen_imem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 233:42]
+  assign gen_imem_slave_io_rspIn_valid = imem_io_rsp_valid; // @[Generator.scala 230:29]
+  assign gen_imem_slave_io_rspIn_bits_dataResponse = imem_io_rsp_bits_dataResponse; // @[Generator.scala 230:29]
+  assign gen_imem_slave_io_rspIn_bits_error = imem_io_rsp_bits_error; // @[Generator.scala 230:29]
   assign gen_dmem_host_clock = clock;
   assign gen_dmem_host_reset = reset;
-  assign gen_dmem_host_io_wbMasterTransmitter_ready = 1'h1; // @[Generator.scala 415:20]
-  assign gen_dmem_host_io_wbSlaveReceiver_bits_ack = switch_io_hostOut_bits_ack; // @[Generator.scala 416:21]
-  assign gen_dmem_host_io_wbSlaveReceiver_bits_dat = switch_io_hostOut_bits_dat; // @[Generator.scala 416:21]
-  assign gen_dmem_host_io_wbSlaveReceiver_bits_err = switch_io_hostOut_bits_err; // @[Generator.scala 416:21]
-  assign gen_dmem_host_io_reqIn_valid = core_io_dmemReq_valid; // @[Generator.scala 408:26]
-  assign gen_dmem_host_io_reqIn_bits_addrRequest = core_io_dmemReq_bits_addrRequest; // @[Generator.scala 408:26]
-  assign gen_dmem_host_io_reqIn_bits_dataRequest = core_io_dmemReq_bits_dataRequest; // @[Generator.scala 408:26]
-  assign gen_dmem_host_io_reqIn_bits_isWrite = core_io_dmemReq_bits_isWrite; // @[Generator.scala 408:26]
-  assign gen_dmem_slave_io_wbSlaveTransmitter_ready = 1'h1; // @[Generator.scala 418:53]
-  assign gen_dmem_slave_io_wbMasterReceiver_valid = switch_io_devOut_0_valid; // @[Generator.scala 419:54]
-  assign gen_dmem_slave_io_wbMasterReceiver_bits_cyc = switch_io_devOut_0_bits_cyc; // @[Generator.scala 419:54]
-  assign gen_dmem_slave_io_wbMasterReceiver_bits_stb = switch_io_devOut_0_bits_stb; // @[Generator.scala 419:54]
-  assign gen_dmem_slave_io_wbMasterReceiver_bits_we = switch_io_devOut_0_bits_we; // @[Generator.scala 419:54]
-  assign gen_dmem_slave_io_wbMasterReceiver_bits_adr = switch_io_devOut_0_bits_adr; // @[Generator.scala 419:54]
-  assign gen_dmem_slave_io_wbMasterReceiver_bits_dat = switch_io_devOut_0_bits_dat; // @[Generator.scala 419:54]
-  assign gen_dmem_slave_io_wbMasterReceiver_bits_sel = switch_io_devOut_0_bits_sel; // @[Generator.scala 419:54]
-  assign gen_dmem_slave_io_rspIn_valid = dmem_io_rsp_valid; // @[Generator.scala 411:27]
-  assign gen_dmem_slave_io_rspIn_bits_dataResponse = dmem_io_rsp_bits_dataResponse; // @[Generator.scala 411:27]
-  assign gen_dmem_slave_io_rspIn_bits_error = 1'h0; // @[Generator.scala 411:27]
+  assign gen_dmem_host_io_wbMasterTransmitter_ready = 1'h1; // @[Generator.scala 244:22]
+  assign gen_dmem_host_io_wbSlaveReceiver_bits_ack = switch_io_hostOut_bits_ack; // @[Generator.scala 245:23]
+  assign gen_dmem_host_io_wbSlaveReceiver_bits_dat = switch_io_hostOut_bits_dat; // @[Generator.scala 245:23]
+  assign gen_dmem_host_io_wbSlaveReceiver_bits_err = switch_io_hostOut_bits_err; // @[Generator.scala 245:23]
+  assign gen_dmem_host_io_reqIn_valid = core_io_dmemReq_valid; // @[Generator.scala 237:28]
+  assign gen_dmem_host_io_reqIn_bits_addrRequest = core_io_dmemReq_bits_addrRequest; // @[Generator.scala 237:28]
+  assign gen_dmem_host_io_reqIn_bits_dataRequest = core_io_dmemReq_bits_dataRequest; // @[Generator.scala 237:28]
+  assign gen_dmem_host_io_reqIn_bits_isWrite = core_io_dmemReq_bits_isWrite; // @[Generator.scala 237:28]
+  assign gen_dmem_slave_io_wbSlaveTransmitter_ready = 1'h1; // @[Generator.scala 247:55]
+  assign gen_dmem_slave_io_wbMasterReceiver_valid = switch_io_devOut_0_valid; // @[Generator.scala 248:56]
+  assign gen_dmem_slave_io_wbMasterReceiver_bits_cyc = switch_io_devOut_0_bits_cyc; // @[Generator.scala 248:56]
+  assign gen_dmem_slave_io_wbMasterReceiver_bits_stb = switch_io_devOut_0_bits_stb; // @[Generator.scala 248:56]
+  assign gen_dmem_slave_io_wbMasterReceiver_bits_we = switch_io_devOut_0_bits_we; // @[Generator.scala 248:56]
+  assign gen_dmem_slave_io_wbMasterReceiver_bits_adr = switch_io_devOut_0_bits_adr; // @[Generator.scala 248:56]
+  assign gen_dmem_slave_io_wbMasterReceiver_bits_dat = switch_io_devOut_0_bits_dat; // @[Generator.scala 248:56]
+  assign gen_dmem_slave_io_wbMasterReceiver_bits_sel = switch_io_devOut_0_bits_sel; // @[Generator.scala 248:56]
+  assign gen_dmem_slave_io_rspIn_valid = dmem_io_rsp_valid; // @[Generator.scala 240:29]
+  assign gen_dmem_slave_io_rspIn_bits_dataResponse = dmem_io_rsp_bits_dataResponse; // @[Generator.scala 240:29]
+  assign gen_dmem_slave_io_rspIn_bits_error = 1'h0; // @[Generator.scala 240:29]
   assign gpio_clock = clock;
   assign gpio_reset = reset;
-  assign gpio_io_req_valid = gen_gpio_slave_io_reqOut_valid; // @[Generator.scala 239:28]
-  assign gpio_io_req_bits_addrRequest = gen_gpio_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 239:28]
-  assign gpio_io_req_bits_dataRequest = gen_gpio_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 239:28]
-  assign gpio_io_req_bits_activeByteLane = gen_gpio_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 239:28]
-  assign gpio_io_req_bits_isWrite = gen_gpio_slave_io_reqOut_bits_isWrite; // @[Generator.scala 239:28]
-  assign gpio_io_cio_gpio_i = {{24'd0}, io_gpio_i}; // @[Generator.scala 244:22]
-  assign gen_gpio_slave_io_wbSlaveTransmitter_ready = 1'h1; // @[Generator.scala 418:53]
-  assign gen_gpio_slave_io_wbMasterReceiver_valid = switch_io_devOut_1_valid; // @[Generator.scala 419:54]
-  assign gen_gpio_slave_io_wbMasterReceiver_bits_cyc = switch_io_devOut_1_bits_cyc; // @[Generator.scala 419:54]
-  assign gen_gpio_slave_io_wbMasterReceiver_bits_stb = switch_io_devOut_1_bits_stb; // @[Generator.scala 419:54]
-  assign gen_gpio_slave_io_wbMasterReceiver_bits_we = switch_io_devOut_1_bits_we; // @[Generator.scala 419:54]
-  assign gen_gpio_slave_io_wbMasterReceiver_bits_adr = switch_io_devOut_1_bits_adr; // @[Generator.scala 419:54]
-  assign gen_gpio_slave_io_wbMasterReceiver_bits_dat = switch_io_devOut_1_bits_dat; // @[Generator.scala 419:54]
-  assign gen_gpio_slave_io_wbMasterReceiver_bits_sel = switch_io_devOut_1_bits_sel; // @[Generator.scala 419:54]
-  assign gen_gpio_slave_io_rspIn_valid = gpio_io_rsp_valid; // @[Generator.scala 240:27]
-  assign gen_gpio_slave_io_rspIn_bits_dataResponse = gpio_io_rsp_bits_dataResponse; // @[Generator.scala 240:27]
-  assign gen_gpio_slave_io_rspIn_bits_error = gpio_io_rsp_bits_error; // @[Generator.scala 240:27]
-  assign uart_clock = clock;
-  assign uart_reset = reset;
-  assign uart_io_request_valid = slaves_2_io_reqOut_valid; // @[Generator.scala 275:28]
-  assign uart_io_request_bits_addrRequest = slaves_2_io_reqOut_bits_addrRequest; // @[Generator.scala 275:28]
-  assign uart_io_request_bits_dataRequest = slaves_2_io_reqOut_bits_dataRequest; // @[Generator.scala 275:28]
-  assign uart_io_request_bits_isWrite = slaves_2_io_reqOut_bits_isWrite; // @[Generator.scala 275:28]
-  assign uart_io_cio_uart_rx_i = io_cio_uart_rx_i; // @[Generator.scala 278:25]
-  assign slaves_2_io_wbSlaveTransmitter_ready = 1'h1; // @[Generator.scala 418:53]
-  assign slaves_2_io_wbMasterReceiver_valid = switch_io_devOut_2_valid; // @[Generator.scala 419:54]
-  assign slaves_2_io_wbMasterReceiver_bits_cyc = switch_io_devOut_2_bits_cyc; // @[Generator.scala 419:54]
-  assign slaves_2_io_wbMasterReceiver_bits_stb = switch_io_devOut_2_bits_stb; // @[Generator.scala 419:54]
-  assign slaves_2_io_wbMasterReceiver_bits_we = switch_io_devOut_2_bits_we; // @[Generator.scala 419:54]
-  assign slaves_2_io_wbMasterReceiver_bits_adr = switch_io_devOut_2_bits_adr; // @[Generator.scala 419:54]
-  assign slaves_2_io_wbMasterReceiver_bits_dat = switch_io_devOut_2_bits_dat; // @[Generator.scala 419:54]
-  assign slaves_2_io_wbMasterReceiver_bits_sel = switch_io_devOut_2_bits_sel; // @[Generator.scala 419:54]
-  assign slaves_2_io_rspIn_valid = uart_io_response_valid; // @[Generator.scala 276:27]
-  assign slaves_2_io_rspIn_bits_dataResponse = uart_io_response_bits_dataResponse; // @[Generator.scala 276:27]
-  assign slaves_2_io_rspIn_bits_error = uart_io_response_bits_error; // @[Generator.scala 276:27]
+  assign gpio_io_req_valid = gen_gpio_slave_io_reqOut_valid; // @[Generator.scala 136:34]
+  assign gpio_io_req_bits_addrRequest = gen_gpio_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 136:34]
+  assign gpio_io_req_bits_dataRequest = gen_gpio_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 136:34]
+  assign gpio_io_req_bits_activeByteLane = gen_gpio_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 136:34]
+  assign gpio_io_req_bits_isWrite = gen_gpio_slave_io_reqOut_bits_isWrite; // @[Generator.scala 136:34]
+  assign gpio_io_cio_gpio_i = {{28'd0}, io_gpio_i}; // @[Generator.scala 141:28]
+  assign gen_gpio_slave_io_wbSlaveTransmitter_ready = 1'h1; // @[Generator.scala 247:55]
+  assign gen_gpio_slave_io_wbMasterReceiver_valid = switch_io_devOut_1_valid; // @[Generator.scala 248:56]
+  assign gen_gpio_slave_io_wbMasterReceiver_bits_cyc = switch_io_devOut_1_bits_cyc; // @[Generator.scala 248:56]
+  assign gen_gpio_slave_io_wbMasterReceiver_bits_stb = switch_io_devOut_1_bits_stb; // @[Generator.scala 248:56]
+  assign gen_gpio_slave_io_wbMasterReceiver_bits_we = switch_io_devOut_1_bits_we; // @[Generator.scala 248:56]
+  assign gen_gpio_slave_io_wbMasterReceiver_bits_adr = switch_io_devOut_1_bits_adr; // @[Generator.scala 248:56]
+  assign gen_gpio_slave_io_wbMasterReceiver_bits_dat = switch_io_devOut_1_bits_dat; // @[Generator.scala 248:56]
+  assign gen_gpio_slave_io_wbMasterReceiver_bits_sel = switch_io_devOut_1_bits_sel; // @[Generator.scala 248:56]
+  assign gen_gpio_slave_io_rspIn_valid = gpio_io_rsp_valid; // @[Generator.scala 137:33]
+  assign gen_gpio_slave_io_rspIn_bits_dataResponse = gpio_io_rsp_bits_dataResponse; // @[Generator.scala 137:33]
+  assign gen_gpio_slave_io_rspIn_bits_error = gpio_io_rsp_bits_error; // @[Generator.scala 137:33]
   assign imem_clock = clock;
   assign imem_reset = reset;
-  assign imem_io_req_valid = gen_imem_slave_io_reqOut_valid; // @[Generator.scala 400:28]
-  assign imem_io_req_bits_addrRequest = gen_imem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 400:28]
-  assign imem_io_req_bits_dataRequest = gen_imem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 400:28]
-  assign imem_io_req_bits_isWrite = gen_imem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 400:28]
+  assign imem_io_req_valid = gen_imem_slave_io_reqOut_valid; // @[Generator.scala 229:30]
+  assign imem_io_req_bits_addrRequest = gen_imem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 229:30]
+  assign imem_io_req_bits_dataRequest = gen_imem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 229:30]
+  assign imem_io_req_bits_isWrite = gen_imem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 229:30]
   assign dmem_clock = clock;
   assign dmem_reset = reset;
-  assign dmem_io_req_valid = gen_dmem_slave_io_reqOut_valid; // @[Generator.scala 410:28]
-  assign dmem_io_req_bits_addrRequest = gen_dmem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 410:28]
-  assign dmem_io_req_bits_dataRequest = gen_dmem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 410:28]
-  assign dmem_io_req_bits_activeByteLane = gen_dmem_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 410:28]
-  assign dmem_io_req_bits_isWrite = gen_dmem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 410:28]
+  assign dmem_io_req_valid = gen_dmem_slave_io_reqOut_valid; // @[Generator.scala 239:30]
+  assign dmem_io_req_bits_addrRequest = gen_dmem_slave_io_reqOut_bits_addrRequest; // @[Generator.scala 239:30]
+  assign dmem_io_req_bits_dataRequest = gen_dmem_slave_io_reqOut_bits_dataRequest; // @[Generator.scala 239:30]
+  assign dmem_io_req_bits_activeByteLane = gen_dmem_slave_io_reqOut_bits_activeByteLane; // @[Generator.scala 239:30]
+  assign dmem_io_req_bits_isWrite = gen_dmem_slave_io_reqOut_bits_isWrite; // @[Generator.scala 239:30]
   assign wbErr_clock = clock;
   assign wbErr_reset = reset;
-  assign wbErr_io_wbMasterReceiver_valid = switch_io_devOut_3_valid; // @[Generator.scala 422:34]
-  assign wbErr_io_wbMasterReceiver_bits_cyc = switch_io_devOut_3_bits_cyc; // @[Generator.scala 422:34]
-  assign wbErr_io_wbMasterReceiver_bits_stb = switch_io_devOut_3_bits_stb; // @[Generator.scala 422:34]
+  assign wbErr_io_wbMasterReceiver_valid = switch_io_devOut_2_valid; // @[Generator.scala 251:36]
+  assign wbErr_io_wbMasterReceiver_bits_cyc = switch_io_devOut_2_bits_cyc; // @[Generator.scala 251:36]
+  assign wbErr_io_wbMasterReceiver_bits_stb = switch_io_devOut_2_bits_stb; // @[Generator.scala 251:36]
   assign core_clock = clock;
   assign core_reset = reset;
-  assign core_io_dmemRsp_valid = gen_dmem_host_io_rspOut_valid; // @[Generator.scala 409:19]
-  assign core_io_dmemRsp_bits_dataResponse = gen_dmem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 409:19]
-  assign core_io_imemReq_ready = gen_imem_host_io_reqIn_ready; // @[Generator.scala 398:26]
-  assign core_io_imemRsp_valid = gen_imem_host_io_rspOut_valid; // @[Generator.scala 399:19]
-  assign core_io_imemRsp_bits_dataResponse = gen_imem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 399:19]
-  assign switch_io_hostIn_valid = gen_dmem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 415:20]
-  assign switch_io_hostIn_bits_cyc = gen_dmem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 415:20]
-  assign switch_io_hostIn_bits_stb = gen_dmem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 415:20]
-  assign switch_io_hostIn_bits_we = gen_dmem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 415:20]
-  assign switch_io_hostIn_bits_adr = gen_dmem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 415:20]
-  assign switch_io_hostIn_bits_dat = gen_dmem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 415:20]
-  assign switch_io_hostIn_bits_sel = gen_dmem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 415:20]
-  assign switch_io_devIn_0_bits_ack = gen_dmem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 418:53]
-  assign switch_io_devIn_0_bits_dat = gen_dmem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 418:53]
-  assign switch_io_devIn_0_bits_err = gen_dmem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 418:53]
-  assign switch_io_devIn_1_bits_ack = gen_gpio_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 418:53]
-  assign switch_io_devIn_1_bits_dat = gen_gpio_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 418:53]
-  assign switch_io_devIn_1_bits_err = gen_gpio_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 418:53]
-  assign switch_io_devIn_2_bits_ack = slaves_2_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 418:53]
-  assign switch_io_devIn_2_bits_dat = slaves_2_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 418:53]
-  assign switch_io_devIn_2_bits_err = slaves_2_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 418:53]
-  assign switch_io_devIn_3_bits_dat = wbErr_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 421:33]
-  assign switch_io_devIn_3_bits_err = wbErr_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 421:33]
-  assign switch_io_devSel = switch_io_devSel_addr_hit_0 ? switch_io_devSel_id_0 : _switch_io_devSel_T_1; // @[Mux.scala 98:16]
-endmodule
-module Generator(
-  input        clock,
-  input        reset,
-  input        io_cio_uart_rx_i,
-  output       io_cio_uart_tx_o,
-  output       io_cio_uart_intr_tx_o,
-  output [3:0] io_gpio_o,
-  output [3:0] io_gpio_en_o,
-  input  [3:0] io_gpio_i
-);
-  wire  genWB_clock; // @[Generator.scala 114:23]
-  wire  genWB_reset; // @[Generator.scala 114:23]
-  wire  genWB_io_cio_uart_rx_i; // @[Generator.scala 114:23]
-  wire  genWB_io_cio_uart_tx_o; // @[Generator.scala 114:23]
-  wire  genWB_io_cio_uart_intr_tx_o; // @[Generator.scala 114:23]
-  wire [7:0] genWB_io_gpio_o; // @[Generator.scala 114:23]
-  wire [7:0] genWB_io_gpio_en_o; // @[Generator.scala 114:23]
-  wire [7:0] genWB_io_gpio_i; // @[Generator.scala 114:23]
-  GeneratorWB genWB ( // @[Generator.scala 114:23]
-    .clock(genWB_clock),
-    .reset(genWB_reset),
-    .io_cio_uart_rx_i(genWB_io_cio_uart_rx_i),
-    .io_cio_uart_tx_o(genWB_io_cio_uart_tx_o),
-    .io_cio_uart_intr_tx_o(genWB_io_cio_uart_intr_tx_o),
-    .io_gpio_o(genWB_io_gpio_o),
-    .io_gpio_en_o(genWB_io_gpio_en_o),
-    .io_gpio_i(genWB_io_gpio_i)
-  );
-  assign io_cio_uart_tx_o = genWB_io_cio_uart_tx_o; // @[Generator.scala 121:22]
-  assign io_cio_uart_intr_tx_o = genWB_io_cio_uart_intr_tx_o; // @[Generator.scala 122:27]
-  assign io_gpio_o = genWB_io_gpio_o[3:0]; // @[Generator.scala 125:15]
-  assign io_gpio_en_o = genWB_io_gpio_en_o[3:0]; // @[Generator.scala 126:18]
-  assign genWB_clock = clock;
-  assign genWB_reset = reset;
-  assign genWB_io_cio_uart_rx_i = io_cio_uart_rx_i; // @[Generator.scala 123:28]
-  assign genWB_io_gpio_i = {{4'd0}, io_gpio_i}; // @[Generator.scala 127:21]
+  assign core_io_dmemRsp_valid = gen_dmem_host_io_rspOut_valid; // @[Generator.scala 238:21]
+  assign core_io_dmemRsp_bits_dataResponse = gen_dmem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 238:21]
+  assign core_io_imemReq_ready = gen_imem_host_io_reqIn_ready; // @[Generator.scala 227:28]
+  assign core_io_imemRsp_valid = gen_imem_host_io_rspOut_valid; // @[Generator.scala 228:21]
+  assign core_io_imemRsp_bits_dataResponse = gen_imem_host_io_rspOut_bits_dataResponse; // @[Generator.scala 228:21]
+  assign switch_io_hostIn_valid = gen_dmem_host_io_wbMasterTransmitter_valid; // @[Generator.scala 244:22]
+  assign switch_io_hostIn_bits_cyc = gen_dmem_host_io_wbMasterTransmitter_bits_cyc; // @[Generator.scala 244:22]
+  assign switch_io_hostIn_bits_stb = gen_dmem_host_io_wbMasterTransmitter_bits_stb; // @[Generator.scala 244:22]
+  assign switch_io_hostIn_bits_we = gen_dmem_host_io_wbMasterTransmitter_bits_we; // @[Generator.scala 244:22]
+  assign switch_io_hostIn_bits_adr = gen_dmem_host_io_wbMasterTransmitter_bits_adr; // @[Generator.scala 244:22]
+  assign switch_io_hostIn_bits_dat = gen_dmem_host_io_wbMasterTransmitter_bits_dat; // @[Generator.scala 244:22]
+  assign switch_io_hostIn_bits_sel = gen_dmem_host_io_wbMasterTransmitter_bits_sel; // @[Generator.scala 244:22]
+  assign switch_io_devIn_0_bits_ack = gen_dmem_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 247:55]
+  assign switch_io_devIn_0_bits_dat = gen_dmem_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 247:55]
+  assign switch_io_devIn_0_bits_err = gen_dmem_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 247:55]
+  assign switch_io_devIn_1_bits_ack = gen_gpio_slave_io_wbSlaveTransmitter_bits_ack; // @[Generator.scala 247:55]
+  assign switch_io_devIn_1_bits_dat = gen_gpio_slave_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 247:55]
+  assign switch_io_devIn_1_bits_err = gen_gpio_slave_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 247:55]
+  assign switch_io_devIn_2_bits_dat = wbErr_io_wbSlaveTransmitter_bits_dat; // @[Generator.scala 250:35]
+  assign switch_io_devIn_2_bits_err = wbErr_io_wbSlaveTransmitter_bits_err; // @[Generator.scala 250:35]
+  assign switch_io_devSel = switch_io_devSel_addr_hit_0 ? switch_io_devSel_id_0 : _switch_io_devSel_T; // @[Mux.scala 98:16]
 endmodule
 module SoCNow(
   input   clock,
@@ -4865,30 +4023,15 @@ module SoCNow(
   inout   io_gpio_io_0,
   inout   io_gpio_io_1,
   inout   io_gpio_io_2,
-  inout   io_gpio_io_3,
-  output  io_spi_cs_n,
-  output  io_spi_sclk,
-  output  io_spi_mosi,
-  input   io_spi_miso,
-  input   io_cio_uart_rx_i,
-  output  io_cio_uart_tx_o,
-  output  io_cio_uart_intr_tx_o,
-  output  io_timer_intr_cmp,
-  output  io_timer_intr_ovf,
-  output  io_i2c_sda,
-  output  io_i2c_scl,
-  output  io_i2c_intr
+  inout   io_gpio_io_3
 );
-  wire  top_clock; // @[Generator.scala 44:19]
-  wire  top_reset; // @[Generator.scala 44:19]
-  wire  top_io_cio_uart_rx_i; // @[Generator.scala 44:19]
-  wire  top_io_cio_uart_tx_o; // @[Generator.scala 44:19]
-  wire  top_io_cio_uart_intr_tx_o; // @[Generator.scala 44:19]
-  wire [3:0] top_io_gpio_o; // @[Generator.scala 44:19]
-  wire [3:0] top_io_gpio_en_o; // @[Generator.scala 44:19]
-  wire [3:0] top_io_gpio_i; // @[Generator.scala 44:19]
-  wire  pll_clk_in1; // @[Generator.scala 45:19]
-  wire  pll_clk_out1; // @[Generator.scala 45:19]
+  wire  gen_clock; // @[Generator.scala 27:21]
+  wire  gen_reset; // @[Generator.scala 27:21]
+  wire [3:0] gen_io_gpio_o; // @[Generator.scala 27:21]
+  wire [3:0] gen_io_gpio_en_o; // @[Generator.scala 27:21]
+  wire [3:0] gen_io_gpio_i; // @[Generator.scala 27:21]
+  wire  pll_clk_in1; // @[Generator.scala 28:21]
+  wire  pll_clk_out1; // @[Generator.scala 28:21]
   wire  gpioPads_0_O; // @[TriStateBuffer.scala 21:81]
   wire  gpioPads_0_I; // @[TriStateBuffer.scala 21:81]
   wire  gpioPads_0_T; // @[TriStateBuffer.scala 21:81]
@@ -4901,27 +4044,24 @@ module SoCNow(
   wire  gpioPads_3_O; // @[TriStateBuffer.scala 21:81]
   wire  gpioPads_3_I; // @[TriStateBuffer.scala 21:81]
   wire  gpioPads_3_T; // @[TriStateBuffer.scala 21:81]
-  wire  gpioEnableWires_0 = top_io_gpio_en_o[0]; // @[Generator.scala 65:46]
-  wire  gpioEnableWires_1 = top_io_gpio_en_o[1]; // @[Generator.scala 65:46]
-  wire  gpioEnableWires_2 = top_io_gpio_en_o[2]; // @[Generator.scala 65:46]
-  wire  gpioEnableWires_3 = top_io_gpio_en_o[3]; // @[Generator.scala 65:46]
-  wire  gpioInputWires_1 = gpioPads_1_O; // @[Generator.scala 50:28 TriStateBuffer.scala 16:11]
-  wire  gpioInputWires_0 = gpioPads_0_O; // @[Generator.scala 50:28 TriStateBuffer.scala 16:11]
-  wire [1:0] top_io_gpio_i_lo = {gpioInputWires_1,gpioInputWires_0}; // @[Generator.scala 63:41]
-  wire  gpioInputWires_3 = gpioPads_3_O; // @[Generator.scala 50:28 TriStateBuffer.scala 16:11]
-  wire  gpioInputWires_2 = gpioPads_2_O; // @[Generator.scala 50:28 TriStateBuffer.scala 16:11]
-  wire [1:0] top_io_gpio_i_hi = {gpioInputWires_3,gpioInputWires_2}; // @[Generator.scala 63:41]
-  Generator top ( // @[Generator.scala 44:19]
-    .clock(top_clock),
-    .reset(top_reset),
-    .io_cio_uart_rx_i(top_io_cio_uart_rx_i),
-    .io_cio_uart_tx_o(top_io_cio_uart_tx_o),
-    .io_cio_uart_intr_tx_o(top_io_cio_uart_intr_tx_o),
-    .io_gpio_o(top_io_gpio_o),
-    .io_gpio_en_o(top_io_gpio_en_o),
-    .io_gpio_i(top_io_gpio_i)
+  wire  gpioEnableWires_0 = gen_io_gpio_en_o[0]; // @[Generator.scala 49:54]
+  wire  gpioEnableWires_1 = gen_io_gpio_en_o[1]; // @[Generator.scala 49:54]
+  wire  gpioEnableWires_2 = gen_io_gpio_en_o[2]; // @[Generator.scala 49:54]
+  wire  gpioEnableWires_3 = gen_io_gpio_en_o[3]; // @[Generator.scala 49:54]
+  wire  gpioInputWires_1 = gpioPads_1_O; // @[Generator.scala 34:32 TriStateBuffer.scala 16:11]
+  wire  gpioInputWires_0 = gpioPads_0_O; // @[Generator.scala 34:32 TriStateBuffer.scala 16:11]
+  wire [1:0] gen_io_gpio_i_lo = {gpioInputWires_1,gpioInputWires_0}; // @[Generator.scala 47:49]
+  wire  gpioInputWires_3 = gpioPads_3_O; // @[Generator.scala 34:32 TriStateBuffer.scala 16:11]
+  wire  gpioInputWires_2 = gpioPads_2_O; // @[Generator.scala 34:32 TriStateBuffer.scala 16:11]
+  wire [1:0] gen_io_gpio_i_hi = {gpioInputWires_3,gpioInputWires_2}; // @[Generator.scala 47:49]
+  Generator gen ( // @[Generator.scala 27:21]
+    .clock(gen_clock),
+    .reset(gen_reset),
+    .io_gpio_o(gen_io_gpio_o),
+    .io_gpio_en_o(gen_io_gpio_en_o),
+    .io_gpio_i(gen_io_gpio_i)
   );
-  PLL_8MHz pll ( // @[Generator.scala 45:19]
+  PLL_8MHz pll ( // @[Generator.scala 28:21]
     .clk_in1(pll_clk_in1),
     .clk_out1(pll_clk_out1)
   );
@@ -4949,27 +4089,16 @@ module SoCNow(
     .I(gpioPads_3_I),
     .T(gpioPads_3_T)
   );
-  assign io_spi_cs_n = 1'h0; // @[Generator.scala 67:15]
-  assign io_spi_sclk = 1'h0; // @[Generator.scala 68:15]
-  assign io_spi_mosi = 1'h0; // @[Generator.scala 69:15]
-  assign io_cio_uart_tx_o = top_io_cio_uart_tx_o; // @[Generator.scala 73:20]
-  assign io_cio_uart_intr_tx_o = top_io_cio_uart_intr_tx_o; // @[Generator.scala 72:25]
-  assign io_timer_intr_cmp = 1'h0; // @[Generator.scala 76:21]
-  assign io_timer_intr_ovf = 1'h0; // @[Generator.scala 77:21]
-  assign io_i2c_sda = 1'h0; // @[Generator.scala 79:14]
-  assign io_i2c_scl = 1'h0; // @[Generator.scala 80:14]
-  assign io_i2c_intr = 1'h0; // @[Generator.scala 81:15]
-  assign top_clock = pll_clk_out1; // @[Generator.scala 48:13]
-  assign top_reset = reset;
-  assign top_io_cio_uart_rx_i = io_cio_uart_rx_i; // @[Generator.scala 74:24]
-  assign top_io_gpio_i = {top_io_gpio_i_hi,top_io_gpio_i_lo}; // @[Generator.scala 63:41]
-  assign pll_clk_in1 = clock; // @[Generator.scala 47:18]
-  assign gpioPads_0_I = top_io_gpio_o[0]; // @[Generator.scala 64:43]
+  assign gen_clock = pll_clk_out1; // @[Generator.scala 31:15]
+  assign gen_reset = reset;
+  assign gen_io_gpio_i = {gen_io_gpio_i_hi,gen_io_gpio_i_lo}; // @[Generator.scala 47:49]
+  assign pll_clk_in1 = clock; // @[Generator.scala 30:20]
+  assign gpioPads_0_I = gen_io_gpio_o[0]; // @[Generator.scala 48:51]
   assign gpioPads_0_T = ~gpioEnableWires_0; // @[TriStateBuffer.scala 15:10]
-  assign gpioPads_1_I = top_io_gpio_o[1]; // @[Generator.scala 64:43]
+  assign gpioPads_1_I = gen_io_gpio_o[1]; // @[Generator.scala 48:51]
   assign gpioPads_1_T = ~gpioEnableWires_1; // @[TriStateBuffer.scala 15:10]
-  assign gpioPads_2_I = top_io_gpio_o[2]; // @[Generator.scala 64:43]
+  assign gpioPads_2_I = gen_io_gpio_o[2]; // @[Generator.scala 48:51]
   assign gpioPads_2_T = ~gpioEnableWires_2; // @[TriStateBuffer.scala 15:10]
-  assign gpioPads_3_I = top_io_gpio_o[3]; // @[Generator.scala 64:43]
+  assign gpioPads_3_I = gen_io_gpio_o[3]; // @[Generator.scala 48:51]
   assign gpioPads_3_T = ~gpioEnableWires_3; // @[TriStateBuffer.scala 15:10]
 endmodule
