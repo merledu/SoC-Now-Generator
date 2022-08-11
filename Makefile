@@ -14,11 +14,15 @@ cleanup: relocate
 initmem:
 	python3 insertmem.py
 
+initmemBitstream:
+	python3 initMemForBitstream.py
+
 clean: 
 	rm -rf $(current_dir)/fpga/build/ $(current_dir)/fpga/PLL_8MHz.v $(current_dir)/fpga/clk_wiz_0_clk_wiz.v
 	rm $(current_dir)/fpga/SoCNow.v 
+	
 
-bitstream: clean rtl initmem cleanup 
+bitstream: clean rtl initmemBitstream cleanup $(current_dir)/fpga/SoCNow.v $(current_dir)/fpga/PLL_8MHz.v $(current_dir)/fpga/clk_wiz_0_clk_wiz.v
 	TARGET="arty_35" $(MAKE) -C fpga
 
 upload: $(current_dir)/fpga/build/arty_35/SoCNow.bit
