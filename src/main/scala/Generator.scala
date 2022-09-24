@@ -297,12 +297,12 @@ class Generator(programFile: Option[String],
       val uart = Module(new uart(new TLRequest(), new TLResponse()))
       val gen_uart_slave = Module(new TilelinkDevice())
 
-      gen_uart_slave.io.reqOut <> uart.io.request
-      gen_uart_slave.io.rspIn <> uart.io.response
+      gen_uart_slave.reqOut <> uart.request
+      gen_uart_slave.rspIn <> uart.response
 
-      uart.io.cio_uart_rx_i := io.cio_uart_rx_i.get
-      io.cio_uart_tx_o.get := uart.io.cio_uart_tx_o
-      io.cio_uart_intr_tx_o.get := uart.io.cio_uart_intr_tx_o  
+      uart.cio_uart_rx_i := cio_uart_rx_i.get
+      cio_uart_tx_o.get := uart.cio_uart_tx_o
+      cio_uart_intr_tx_o.get := uart.cio_uart_intr_tx_o  
 
       addressMap.addDevice(Peripherals.all(configs("UART")("id").asInstanceOf[Int]), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
     }
@@ -322,13 +322,13 @@ class Generator(programFile: Option[String],
       val spi_flash = Module(new SpiFlash(new TLRequest(), new TLResponse()))
       val gen_spi_flash_slave = Module(new TilelinkDevice())
 
-      gen_spi_flash_slave.io.reqOut <> spi_flash.io.req
-      gen_spi_flash_slave.io.rspIn <> spi_flash.io.rsp
+      gen_spi_flash_slave.reqOut <> spi_flash.req
+      gen_spi_flash_slave.rspIn <> spi_flash.rsp
 
-      io.spi_flash_cs_n.get := spi_flash.io.cs_n
-      io.spi_flash_sclk.get := spi_flash.io.sclk
-      io.spi_flash_mosi.get := spi_flash.io.mosi
-      spi_flash.io.miso := io.spi_flash_miso.get
+      spi_flash_cs_n.get := spi_flash.cs_n
+      spi_flash_sclk.get := spi_flash.sclk
+      spi_flash_mosi.get := spi_flash.mosi
+      spi_flash.miso := spi_flash_miso.get
 
       addressMap.addDevice(Peripherals.all(configs("SPIF")("id").asInstanceOf[Int]), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
     }
@@ -360,32 +360,32 @@ class Generator(programFile: Option[String],
     val switch = Module(new Switch1toN(new TilelinkMaster(), new TilelinkSlave(), devices.size))
 
     // TL <-> Core (fetch)
-    gen_imem_host.io.reqIn <> core.io.imemReq
-    core.io.imemRsp <> gen_imem_host.io.rspOut
-    gen_imem_slave.io.reqOut <> imem.io.req
-    gen_imem_slave.io.rspIn <> imem.io.rsp
+    gen_imem_host.reqIn <> core.imemReq
+    core.imemRsp <> gen_imem_host.rspOut
+    gen_imem_slave.reqOut <> imem.req
+    gen_imem_slave.rspIn <> imem.rsp
 
     // TL <-> TL (fetch)
-    gen_imem_host.io.tlMasterTransmitter <> gen_imem_slave.io.tlMasterReceiver
-    gen_imem_slave.io.tlSlaveTransmitter <> gen_imem_host.io.tlSlaveReceiver
+    gen_imem_host.tlMasterTransmitter <> gen_imem_slave.tlMasterReceiver
+    gen_imem_slave.tlSlaveTransmitter <> gen_imem_host.tlSlaveReceiver
 
     // TL <-> Core (memory)
-    gen_dmem_host.io.reqIn <> core.io.dmemReq
-    core.io.dmemRsp <> gen_dmem_host.io.rspOut
-    gen_dmem_slave.io.reqOut <> dmem.io.req
-    gen_dmem_slave.io.rspIn <> dmem.io.rsp
+    gen_dmem_host.reqIn <> core.dmemReq
+    core.dmemRsp <> gen_dmem_host.rspOut
+    gen_dmem_slave.reqOut <> dmem.req
+    gen_dmem_slave.rspIn <> dmem.rsp
 
 
     // Switch connection
-    switch.io.hostIn <> gen_dmem_host.io.tlMasterTransmitter
-    switch.io.hostOut <> gen_dmem_host.io.tlSlaveReceiver
+    switch.hostIn <> gen_dmem_host.tlMasterTransmitter
+    switch.hostOut <> gen_dmem_host.tlSlaveReceiver
     for (i <- 0 until devices.size) {
-      switch.io.devIn(devices(i)._2.litValue().toInt) <> devices(i)._1.asInstanceOf[TilelinkDevice].io.tlSlaveTransmitter
-      switch.io.devOut(devices(i)._2.litValue().toInt) <> devices(i)._1.asInstanceOf[TilelinkDevice].io.tlMasterReceiver
+      switch.devIn(devices(i)._2.litValue().toInt) <> devices(i)._1.asInstanceOf[TilelinkDevice].tlSlaveTransmitter
+      switch.devOut(devices(i)._2.litValue().toInt) <> devices(i)._1.asInstanceOf[TilelinkDevice].tlMasterReceiver
     }
-    switch.io.devIn(devices.size) <> tlErr.io.tlSlaveTransmitter
-    switch.io.devOut(devices.size) <> tlErr.io.tlMasterReceiver
-    switch.io.devSel := BusDecoder.decode(gen_dmem_host.io.tlMasterTransmitter.bits.a_address, addressMap)
+    switch.devIn(devices.size) <> tlErr.tlSlaveTransmitter
+    switch.devOut(devices.size) <> tlErr.tlMasterReceiver
+    switch.devSel := BusDecoder.decode(gen_dmem_host.tlMasterTransmitter.bits.a_address, addressMap)
   }
   // else if (configs("TLC")("is").asInstanceOf[Boolean]){
   //   implicit val config:TilelinkConfig = TilelinkConfig(10,32)
