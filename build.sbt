@@ -21,7 +21,8 @@ lazy val root = (project in file("."))
       "edu.berkeley.cs" %% "chisel3" % "3.4.3",
       "edu.berkeley.cs" %% "chiseltest" % "0.3.3" % "test",
       "io.spray" %% "spray-json" % "1.3.5",
-      "com.lihaoyi" %% "os-lib" % "0.2.7"
+      "com.lihaoyi" %% "os-lib" % "0.2.7",
+      "com.sifive" %% "chisel-circt" % "0.6.0"
       // "org.json4s" %% "json4s-jackson" % "3.2.11"
     ),
     scalacOptions ++= Seq(
