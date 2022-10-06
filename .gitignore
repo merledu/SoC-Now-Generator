@@ -1,8 +1,5 @@
 *.v
-*.sv
 *.f
-*.fir
-*.anno.json
 ### Project Specific stuff
 test_run_dir/*
 .metals/*
