@@ -549,7 +549,7 @@ object GeneratorDriver extends App {
                                            "WB"   -> Map("is" -> oneZero("wb")),
                                            "TLC"   -> Map("is" -> oneZero("tlc")))
 
-  (new ChiselStage).emitVerilog(new Generator(programFile=None, configs))
+  (new ChiselStage).emitSystemVerilog(new Generator(programFile=None, configs))
 }
 
 object SoCNowDriver extends App {
