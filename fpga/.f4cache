@@ -1,0 +1,53 @@
+{
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/SoCNow.v": {
+        "synth": 3694182643
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35": {
+        "synth": 0
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/arty.xdc": {
+        "synth": 1131161752
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.eblif": {
+        "fasm": 1578779330,
+        "pack": 1578779330,
+        "place": 1578779330,
+        "ioplace": 1578779330,
+        "place_constraints": 1578779330,
+        "route": 1578779330
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/xc7a50t_test_sdc.sdc": {
+        "pack": 1,
+        "place": 1,
+        "route": 1,
+        "fasm": 1
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.net": {
+        "fasm": 1006923883,
+        "ioplace": 1006923883,
+        "place_constraints": 1006923883
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.ioplace": {
+        "place_constraints": 777199791,
+        "place": 777199791
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.preplace": {
+        "place": 1558803491
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.place": {
+        "fasm": 3522501849,
+        "route": 3522501849
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.route": {
+        "fasm": 4106436584
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow_fasm_extra.fasm": {
+        "fasm": 1
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.fasm": {
+        "bitstream": 2914721215
+    },
+    "/home/skashif/Documents/SoC-Now/SoC-Now-Generator/fpga/build/arty_35/SoCNow.bit": {
+        "__target": 4057292426
+    }
+}

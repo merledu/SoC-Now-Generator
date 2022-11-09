@@ -1,0 +1,26 @@
+[
+  {
+    "class":"firrtl.EmitCircuitAnnotation",
+    "emitter":"firrtl.VerilogEmitter"
+  },
+  {
+    "class":"firrtl.transforms.DontTouchAnnotation",
+    "target":"~SpiHarness|WishboneDevice>io_wbSlaveTransmitter_ready"
+  },
+  {
+    "class":"firrtl.transforms.DontTouchAnnotation",
+    "target":"~SpiHarness|WishboneDevice>io_wbMasterReceiver_ready"
+  },
+  {
+    "class":"firrtl.transforms.DontTouchAnnotation",
+    "target":"~SpiHarness|WishboneHost>io_wbSlaveReceiver_ready"
+  },
+  {
+    "class":"firrtl.transforms.DontTouchAnnotation",
+    "target":"~SpiHarness|WishboneHost>io_wbMasterTransmitter_ready"
+  },
+  {
+    "class":"firrtl.transforms.BlackBoxTargetDirAnno",
+    "targetDir":"."
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "class":"firrtl.transforms.CombinationalPath",
+    "sink":"~I2CHarnessTL|I2CHarnessTL>io_cio_i2c_scl",
+    "sources":[
+      "~I2CHarnessTL|I2CHarnessTL>clock"
+    ]
+  },
+  {
+    "class":"firrtl.transforms.CombinationalPath",
+    "sink":"~I2CHarnessTL|I2CHarnessTL>io_cio_i2c_sda",
+    "sources":[
+      "~I2CHarnessTL|I2CHarnessTL>reset"
+    ]
+  },
+  {
+    "class":"firrtl.EmitCircuitAnnotation",
+    "emitter":"firrtl.VerilogEmitter"
+  },
+  {
+    "class":"firrtl.transforms.DontTouchAnnotation",
+    "target":"~I2CHarnessTL|TilelinkHost>io_reqIn_valid"
+  },
+  {
+    "class":"firrtl.transforms.DontTouchAnnotation",
+    "target":"~I2CHarnessTL|TilelinkHost>stateReg"
+  },
+  {
+    "class":"firrtl.transforms.BlackBoxTargetDirAnno",
+    "targetDir":"."
+  }
+]

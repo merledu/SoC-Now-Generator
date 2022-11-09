@@ -1,71 +1,27 @@
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-current_dir := $(patsubst %/,%,$(dir $(mkfile_path)))
-TOP:=SoCNow
-VERILOG := ${current_dir}/SoCNow.v \
+current_dir := ${CURDIR}
+TOP := SoCNow
+SOURCES := ${current_dir}/SoCNow.v \
 	   ${current_dir}/PLL_8MHz.v \
-	   ${current_dir}/clk_wiz_0_clk_wiz.v  
-DEVICE  := xc7a50t_test
-BITSTREAM_DEVICE := artix7
-BUILDDIR:=build
+	   ${current_dir}/clk_wiz_0_clk_wiz.v
 
 ifeq ($(TARGET),arty_35)
-  PARTNAME := xc7a35tcsg324-1
-  XDC:=${current_dir}/arty.xdc
-  #XDC:=~/SoCNow/fpga/arty.xdc
-  BOARD_BUILDDIR := ${BUILDDIR}/arty_35
-else ifeq ($(TARGET),arty_100)
-  PARTNAME:= xc7a100tcsg324-1
-  XDC:=${current_dir}/arty.xdc
-  DEVICE:= xc7a100t_test
-  BOARD_BUILDDIR := ${BUILDDIR}/arty_100
-else ifeq ($(TARGET),nexys4ddr)
-  PARTNAME:= xc7a100tcsg324-1
-  XDC:=${current_dir}/nexys4ddr.xdc
-  DEVICE:= xc7a100t_test
-  BOARD_BUILDDIR := ${BUILDDIR}/nexys4ddr
-else ifeq ($(TARGET),zybo)
-  PARTNAME:= xc7z010clg400-1
-  XDC:=${current_dir}/zybo.xdc
-  DEVICE:= xc7z010_test
-  BITSTREAM_DEVICE:= zynq7
-  BOARD_BUILDDIR := ${BUILDDIR}/zybo
-  VERILOG:=${current_dir}/counter_zynq.v
-else ifeq ($(TARGET),nexys_video)
-  PARTNAME:= xc7a200tsbg484-1
-  XDC:=${current_dir}/nexys_video.xdc
-  DEVICE:= xc7a200t_test
-  BOARD_BUILDDIR := ${BUILDDIR}/nexys_video
+ifdef F4PGA_USE_DEPRECATED
+  XDC := ${current_dir}/arty.xdc
 else
-  PARTNAME:= xc7a35tcpg236-1
-  XDC:=${current_dir}/basys3.xdc
-  BOARD_BUILDDIR := ${BUILDDIR}/basys3
+build:
+	f4pga -vv build --flow ./flow.json
+endif
+else ifeq ($(TARGET),arty_100)
+  XDC := ${current_dir}/arty.xdc
+else ifeq ($(TARGET),nexys4ddr)
+  XDC := ${current_dir}/nexys4ddr.xdc
+else ifeq ($(TARGET),zybo)
+  XDC := ${current_dir}/zybo.xdc
+  SOURCES:=${current_dir}/counter_zynq.v
+else ifeq ($(TARGET),nexys_video)
+  XDC := ${current_dir}/nexys_video.xdc
+else ifeq ($(TARGET),basys3)
+  XDC := ${current_dir}/basys3.xdc
 endif
 
-.DELETE_ON_ERROR:
-
-
-all: ${BOARD_BUILDDIR}/${TOP}.bit
-
-${BOARD_BUILDDIR}:
-	mkdir -p ${BOARD_BUILDDIR}
-
-${BOARD_BUILDDIR}/${TOP}.eblif: | ${BOARD_BUILDDIR}
-	cd ${BOARD_BUILDDIR} && symbiflow_synth -t ${TOP} -v ${VERILOG} -d ${BITSTREAM_DEVICE} -p ${PARTNAME} -x ${XDC} 2>&1 > /dev/null
-
-${BOARD_BUILDDIR}/${TOP}.net: ${BOARD_BUILDDIR}/${TOP}.eblif
-	cd ${BOARD_BUILDDIR} && symbiflow_pack -e ${TOP}.eblif -d ${DEVICE} 2>&1 > /dev/null
-
-${BOARD_BUILDDIR}/${TOP}.place: ${BOARD_BUILDDIR}/${TOP}.net
-	cd ${BOARD_BUILDDIR} && symbiflow_place -e ${TOP}.eblif -d ${DEVICE} -n ${TOP}.net -P ${PARTNAME} 2>&1 > /dev/null
-
-${BOARD_BUILDDIR}/${TOP}.route: ${BOARD_BUILDDIR}/${TOP}.place
-	cd ${BOARD_BUILDDIR} && symbiflow_route -e ${TOP}.eblif -d ${DEVICE} 2>&1 > /dev/null
-
-${BOARD_BUILDDIR}/${TOP}.fasm: ${BOARD_BUILDDIR}/${TOP}.route
-	cd ${BOARD_BUILDDIR} && symbiflow_write_fasm -e ${TOP}.eblif -d ${DEVICE}
-
-${BOARD_BUILDDIR}/${TOP}.bit: ${BOARD_BUILDDIR}/${TOP}.fasm
-	cd ${BOARD_BUILDDIR} && symbiflow_write_bitstream -d ${BITSTREAM_DEVICE} -f ${TOP}.fasm -p ${PARTNAME} -b ${TOP}.bit
-
-clean:
-	rm -rf ${BUILDDIR}
+include /home/skashif/f4pga-examples/common/common.mk
