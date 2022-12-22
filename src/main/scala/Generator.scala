@@ -17,7 +17,7 @@ import jigsaw.peripherals.timer._
 import jigsaw.peripherals.i2c._
 import ccache.caches.DMCache
 
-class SoCNow(programFile: Option[String],
+class SoCNow(programFile: Option[String], 
                  configs:Map[Any, Map[Any, Any]]) extends Module {
 
     val n = configs("GPIO")("n").asInstanceOf[Int]
