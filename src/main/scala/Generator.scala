@@ -1,5 +1,5 @@
 import chisel3._
-import nucleusrv.components.Core
+import nucleusrv.components.{Core, Configs}
 import caravan.bus.common.{AddressMap, BusDecoder, Switch1toN, Peripherals}
 
 import caravan.bus.tilelink.{TLRequest, TLResponse, TilelinkConfig, TilelinkDevice, TilelinkError, TilelinkHost, TilelinkMaster, TilelinkSlave, TilelinkCDevice}
@@ -15,7 +15,7 @@ import jigsaw.peripherals.spi._
 import jigsaw.peripherals.UART._
 import jigsaw.peripherals.timer._
 import jigsaw.peripherals.i2c._
-import ccache.caches.DMCache
+// import ccache.caches.DMCache
 
 class SoCNow(programFile: Option[String],
                  configs:Map[Any, Map[Any, Any]]) extends Module {
@@ -126,7 +126,9 @@ class Generator(programFile: Option[String],
 
     val addressMap = new AddressMap
 
-    addressMap.addDevice(Peripherals.all(configs("DCCM")("id").asInstanceOf[Int]), configs("DCCM")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_dmem_slave)
+    Peripherals.addValuesFromJson("peripherals.json")
+
+    addressMap.addDevice(Peripherals.get("DCCM"), configs("DCCM")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_dmem_slave)
 
     if(configs("GPIO")("is").asInstanceOf[Boolean]){
         // GPIO
@@ -140,7 +142,7 @@ class Generator(programFile: Option[String],
         io.gpio_en_o.get := gpio.io.cio_gpio_en_o(n-1,0)
         gpio.io.cio_gpio_i := io.gpio_i.get
 
-        addressMap.addDevice(Peripherals.all(configs("GPIO")("id").asInstanceOf[Int]), configs("GPIO")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_gpio_slave)
+        addressMap.addDevice(Peripherals.get("GPIO"), configs("GPIO")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_gpio_slave)
       //
     }
     if(configs("SPI")("is").asInstanceOf[Boolean]){
@@ -155,7 +157,7 @@ class Generator(programFile: Option[String],
       io.spi_mosi.get := spi.io.mosi
       spi.io.miso := io.spi_miso.get
 
-      addressMap.addDevice(Peripherals.all(configs("SPI")("id").asInstanceOf[Int]), configs("SPI")("baseAddr").asInstanceOf[String].U(32.W), configs("SPI")("mask").asInstanceOf[String].U(32.W), gen_spi_slave)
+      addressMap.addDevice(Peripherals.get("SPI"), configs("SPI")("baseAddr").asInstanceOf[String].U(32.W), configs("SPI")("mask").asInstanceOf[String].U(32.W), gen_spi_slave)
     }
     if (configs("UART")("is").asInstanceOf[Boolean]){
       val uart = Module(new uart(new WBRequest(), new WBResponse()))
@@ -168,7 +170,7 @@ class Generator(programFile: Option[String],
       io.cio_uart_tx_o.get := uart.io.cio_uart_tx_o
       io.cio_uart_intr_tx_o.get := uart.io.cio_uart_intr_tx_o  
 
-      addressMap.addDevice(Peripherals.all(configs("UART")("id").asInstanceOf[Int]), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
+      addressMap.addDevice(Peripherals.get("UART"), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
     }
     if (configs("TIMER")("is").asInstanceOf[Boolean]){
       val timer = Module(new Timer(new WBRequest(), new WBResponse()))
@@ -180,7 +182,7 @@ class Generator(programFile: Option[String],
       io.timer_intr_cmp.get := timer.io.cio_timer_intr_cmp
       io.timer_intr_ovf.get := timer.io.cio_timer_intr_ovf
 
-      addressMap.addDevice(Peripherals.all(configs("TIMER")("id").asInstanceOf[Int]), configs("TIMER")("baseAddr").asInstanceOf[String].U(32.W), configs("TIMER")("mask").asInstanceOf[String].U(32.W), gen_timer_slave)
+      addressMap.addDevice(Peripherals.get("TIMER"), configs("TIMER")("baseAddr").asInstanceOf[String].U(32.W), configs("TIMER")("mask").asInstanceOf[String].U(32.W), gen_timer_slave)
     }
     if (configs("SPIF")("is").asInstanceOf[Boolean]){
       val spi_flash = Module(new SpiFlash(new WBRequest(), new WBResponse()))
@@ -194,7 +196,7 @@ class Generator(programFile: Option[String],
       io.spi_flash_mosi.get := spi_flash.io.mosi
       spi_flash.io.miso := io.spi_flash_miso.get
 
-      addressMap.addDevice(Peripherals.all(configs("SPIF")("id").asInstanceOf[Int]), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
+      addressMap.addDevice(Peripherals.get("SPIF"), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
     }
     if (configs("I2C")("is").asInstanceOf[Boolean]){
       val i2c = Module(new i2c(new WBRequest(), new WBResponse()))
@@ -208,7 +210,7 @@ class Generator(programFile: Option[String],
       io.i2c_scl.get := i2c.io.cio_i2c_scl
       io.i2c_intr.get := i2c.io.cio_i2c_intr
 
-      addressMap.addDevice(Peripherals.all(configs("I2C")("id").asInstanceOf[Int]), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
+      addressMap.addDevice(Peripherals.get("I2C"), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
 
     }
 
@@ -216,7 +218,11 @@ class Generator(programFile: Option[String],
     val dmem = Module(BlockRam.createMaskableRAM(bus=config, rows=1024))
     
     val wbErr = Module(new WishboneErr())
-    val core = Module(new Core(new WBRequest, new WBResponse)(M = configs("M")("is").asInstanceOf[Boolean]))
+
+    implicit val coreconfig = Configs()
+    val core = Module(new Core())
+
+    core.io.stall := false.B
 
 
     val devices = addressMap.getDevices
@@ -261,7 +267,9 @@ class Generator(programFile: Option[String],
 
     val addressMap = new AddressMap
 
-    addressMap.addDevice(Peripherals.all(configs("DCCM")("id").asInstanceOf[Int]), configs("DCCM")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_dmem_slave)
+    Peripherals.addValuesFromJson("peripherals.json")
+
+    addressMap.addDevice(Peripherals.get("DCCM"), configs("DCCM")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_dmem_slave)
 
     if(configs("GPIO")("is").asInstanceOf[Boolean]){
         // GPIO
@@ -275,7 +283,7 @@ class Generator(programFile: Option[String],
         io.gpio_en_o.get := gpio.io.cio_gpio_en_o(n-1,0)
         gpio.io.cio_gpio_i := io.gpio_i.get
 
-        addressMap.addDevice(Peripherals.all(configs("GPIO")("id").asInstanceOf[Int]), configs("GPIO")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_gpio_slave)
+        addressMap.addDevice(Peripherals.get("GPIO"), configs("GPIO")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_gpio_slave)
       //
     }
     if(configs("SPI")("is").asInstanceOf[Boolean]){
@@ -290,7 +298,7 @@ class Generator(programFile: Option[String],
       io.spi_mosi.get := spi.io.mosi
       spi.io.miso := io.spi_miso.get
 
-      addressMap.addDevice(Peripherals.all(configs("SPI")("id").asInstanceOf[Int]), configs("SPI")("baseAddr").asInstanceOf[String].U(32.W), configs("SPI")("mask").asInstanceOf[String].U(32.W), gen_spi_slave)
+      addressMap.addDevice(Peripherals.get("SPI"), configs("SPI")("baseAddr").asInstanceOf[String].U(32.W), configs("SPI")("mask").asInstanceOf[String].U(32.W), gen_spi_slave)
     }
     if (configs("UART")("is").asInstanceOf[Boolean]){
       val uart = Module(new uart(new TLRequest(), new TLResponse()))
@@ -303,7 +311,7 @@ class Generator(programFile: Option[String],
       io.cio_uart_tx_o.get := uart.io.cio_uart_tx_o
       io.cio_uart_intr_tx_o.get := uart.io.cio_uart_intr_tx_o  
 
-      addressMap.addDevice(Peripherals.all(configs("UART")("id").asInstanceOf[Int]), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
+      addressMap.addDevice(Peripherals.get("UART"), configs("UART")("baseAddr").asInstanceOf[String].U(32.W), configs("UART")("mask").asInstanceOf[String].U(32.W), gen_uart_slave)
     }
     if (configs("TIMER")("is").asInstanceOf[Boolean]){
       val timer = Module(new Timer(new TLRequest(), new TLResponse()))
@@ -315,7 +323,7 @@ class Generator(programFile: Option[String],
       io.timer_intr_cmp.get := timer.io.cio_timer_intr_cmp
       io.timer_intr_ovf.get := timer.io.cio_timer_intr_ovf
 
-      addressMap.addDevice(Peripherals.all(configs("TIMER")("id").asInstanceOf[Int]), configs("TIMER")("baseAddr").asInstanceOf[String].U(32.W), configs("TIMER")("mask").asInstanceOf[String].U(32.W), gen_timer_slave)
+      addressMap.addDevice(Peripherals.get("TIMER"), configs("TIMER")("baseAddr").asInstanceOf[String].U(32.W), configs("TIMER")("mask").asInstanceOf[String].U(32.W), gen_timer_slave)
     }
     if (configs("SPIF")("is").asInstanceOf[Boolean]){
       val spi_flash = Module(new SpiFlash(new TLRequest(), new TLResponse()))
@@ -329,7 +337,7 @@ class Generator(programFile: Option[String],
       io.spi_flash_mosi.get := spi_flash.io.mosi
       spi_flash.io.miso := io.spi_flash_miso.get
 
-      addressMap.addDevice(Peripherals.all(configs("SPIF")("id").asInstanceOf[Int]), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
+      addressMap.addDevice(Peripherals.get("SPIF"), configs("SPIF")("baseAddr").asInstanceOf[String].U(32.W), configs("SPIF")("mask").asInstanceOf[String].U(32.W), gen_spi_flash_slave)
     }
     if (configs("I2C")("is").asInstanceOf[Boolean]){
       val i2c = Module(new i2c(new TLRequest(), new TLResponse()))
@@ -343,7 +351,7 @@ class Generator(programFile: Option[String],
       io.i2c_scl.get := i2c.io.cio_i2c_scl
       io.i2c_intr.get := i2c.io.cio_i2c_intr
 
-      addressMap.addDevice(Peripherals.all(configs("I2C")("id").asInstanceOf[Int]), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
+      addressMap.addDevice(Peripherals.get("I2C"), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
 
     }
 
@@ -351,7 +359,10 @@ class Generator(programFile: Option[String],
     val dmem = Module(BlockRam.createMaskableRAM(bus=config, rows=1024))
     
     val tlErr = Module(new TilelinkError())
-    val core = Module(new Core(new TLRequest, new TLResponse)(M = configs("M")("is").asInstanceOf[Boolean]))
+    implicit val coreconfig = Configs()
+    val core = Module(new Core())
+
+    core.io.stall := false.B
 
 
     val devices = addressMap.getDevices
@@ -385,7 +396,7 @@ class Generator(programFile: Option[String],
     switch.io.devIn(devices.size) <> tlErr.io.tlSlaveTransmitter
     switch.io.devOut(devices.size) <> tlErr.io.tlMasterReceiver
     switch.io.devSel := BusDecoder.decode(gen_dmem_host.io.tlMasterTransmitter.bits.a_address, addressMap)
-  }
+  }/**
   else if (configs("TLC")("is").asInstanceOf[Boolean]){
     implicit val config:TilelinkConfig = TilelinkConfig(10,32)
 
@@ -520,7 +531,7 @@ class Generator(programFile: Option[String],
     switch.io.devIn(devices.size) <> tlErr.io.tlSlaveTransmitter
     switch.io.devOut(devices.size) <> tlErr.io.tlMasterReceiver
     switch.io.devSel := BusDecoder.decode(gen_dmem_host.io.tlMasterTransmitter.bits.a_address, addressMap)
-  }
+  }**/
 }
 
 import spray.json._

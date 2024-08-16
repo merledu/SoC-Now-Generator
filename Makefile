@@ -2,7 +2,6 @@ current_dir = $(shell pwd)
 
 
 rtl:
-	python3 ./peripheralScript.py
 	sbt "runMain SoCNowDriver"
 
 relocate: SoCNow.v PLL_8MHz.v clk_wiz_0_clk_wiz.v
