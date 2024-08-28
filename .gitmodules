@@ -11,3 +11,6 @@
 	path = jigsaw
 	url = https://github.com/talha-ahmed-1/jigsaw
 	branch = independent
+[submodule "BabyKyberAcceleratorCHISEL"]
+	path = BabyKyberAcceleratorCHISEL
+	url = https://github.com/merledu/BabyKyberAcceleratorCHISEL
