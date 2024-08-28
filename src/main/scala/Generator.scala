@@ -2,7 +2,7 @@ import chisel3._
 import nucleusrv.components.{Core, Configs}
 import caravan.bus.common.{AddressMap, BusDecoder, Switch1toN, Peripherals}
 
-import caravan.bus.tilelink.{TLRequest, TLResponse, TilelinkConfig, TilelinkDevice, TilelinkError, TilelinkHost, TilelinkMaster, TilelinkSlave, TilelinkCDevice}
+import caravan.bus.tilelink.{TLRequest, TLResponse, TilelinkConfig, TilelinkDevice, TilelinkError, TilelinkHost, TilelinkMaster, TilelinkSlave}
 import caravan.bus.wishbone.{WBRequest, WBResponse, WishboneConfig, WishboneDevice, WishboneHost, WishboneMaster, WishboneSlave}
 import caravan.bus.wishbone.{WishboneErr}
 import chisel3.experimental.Analog
