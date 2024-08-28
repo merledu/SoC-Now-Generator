@@ -5,7 +5,8 @@ case class BaseAddr(
     UART            : String = "h40003000",
     SPIF            : String = "h40004000",
     I2C             : String = "h40005000",
-    TIMER           : String = "h40006000"
+    TIMER           : String = "h40006000",
+    BabyKyber       : String = "h40007000"
 )
 
 case class Mask(
@@ -15,5 +16,7 @@ case class Mask(
     UART            : String = "h00000fff",
     SPIF            : String = "h00000fff",
     I2C             : String = "h00000fff",
-    TIMER           : String = "h00000fff"
+    TIMER           : String = "h00000fff",
+    BabyKyber       : String = "h00000fff"
+
 )

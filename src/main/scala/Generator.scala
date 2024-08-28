@@ -15,6 +15,8 @@ import jigsaw.peripherals.spi._
 import jigsaw.peripherals.UART._
 import jigsaw.peripherals.timer._
 import jigsaw.peripherals.i2c._
+
+import BabyKyberAcceleratorCHISEL.BabyKyber.BabyKyberTop
 // import ccache.caches.DMCache
 
 class SoCNow(programFile: Option[String],
@@ -212,6 +214,17 @@ class Generator(programFile: Option[String],
 
       addressMap.addDevice(Peripherals.get("I2C"), configs("I2C")("baseAddr").asInstanceOf[String].U(32.W), configs("I2C")("mask").asInstanceOf[String].U(32.W), gen_i2c_slave)
 
+    }
+
+    if (configs("BabyKyber")("is").asInstanceOf[Boolean]){
+
+      val babykyber = Module(new BabyKyberTop())
+      val gen_babykyber_slave = Module(new WishboneDevice())
+
+      gen_babykyber_slave.io.reqOut <> babykyber.io.req
+      gen_babykyber_slave.io.rspIn  <> babykyber.io.rsp
+
+      addressMap.addDevice(Peripherals.get("BabyKyber"), configs("BabyKyber")("baseAddr").asInstanceOf[String].U(32.W), configs("BabyKyber")("mask").asInstanceOf[String].U(32.W), gen_babykyber_slave)
     }
 
     val imem = Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
@@ -558,7 +571,9 @@ object GeneratorDriver extends App {
                                            "M"    -> Map("is" -> oneZero("m")),
                                            "TL"   -> Map("is" -> oneZero("tl")),
                                            "WB"   -> Map("is" -> oneZero("wb")),
-                                           "TLC"   -> Map("is" -> oneZero("tlc")))
+                                           "TLC"   -> Map("is" -> oneZero("tlc")),
+                                           "BabyKyber"   -> Map("is" -> oneZero("babykyber"), "is" -> oneZero("babykyber") , "baseAddr" -> baseAddr.BabyKyber , "mask" -> mask.BabyKyber )
+                                           )
 
   (new ChiselStage).emitVerilog(new Generator(programFile=None, configs))
 }
@@ -584,7 +599,9 @@ object SoCNowDriver extends App {
                                            "M"    -> Map("is" -> oneZero("m")),
                                            "TL"   -> Map("is" -> oneZero("tl")),
                                            "WB"   -> Map("is" -> oneZero("wb")),
-                                           "TLC"   -> Map("is" -> oneZero("tlc")))
+                                           "TLC"   -> Map("is" -> oneZero("tlc")),
+                                           "BabyKyber"   -> Map("is" -> oneZero("babykyber"), "is" -> oneZero("babykyber") , "baseAddr" -> baseAddr.BabyKyber , "mask" -> mask.BabyKyber )
+                                           )
 
   (new ChiselStage).emitVerilog(new SoCNow(programFile=None, configs))
 }

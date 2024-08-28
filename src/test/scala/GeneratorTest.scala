@@ -33,7 +33,9 @@ class GeneratorTest extends FreeSpec with ChiselScalatestTester {
                                            "M"    -> Map("is" -> oneZero("m")),
                                            "TL"   -> Map("is" -> oneZero("tl")),
                                            "WB"   -> Map("is" -> oneZero("wb")),
-                                           "TLC"   -> Map("is" -> oneZero("tlc")))
+                                           "TLC"   -> Map("is" -> oneZero("tlc")),
+                                           "BabyKyber"   -> Map("is" -> oneZero("babykyber"), "is" -> oneZero("babykyber") , "baseAddr" -> baseAddr.BabyKyber , "mask" -> mask.BabyKyber)
+                                           )
 
   def getFile: Option[String] = {
     if (scalaTestContext.value.get.configMap.contains("memFile")) {
