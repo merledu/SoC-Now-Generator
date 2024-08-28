@@ -14,6 +14,8 @@ lazy val nucleusrv = (project in file("nucleusrv")).dependsOn(caravan, jigsaw)
 
 lazy val ccache   = (project in file("cachefy")).dependsOn(caravan, jigsaw)
 
+lazy val BabyKyberAcceleratorCHISEL = (project in file("BabyKyberAcceleratorCHISEL"))
+
 lazy val root = (project in file("."))
   .settings(
     name := "SoCNow",
@@ -36,4 +38,4 @@ lazy val root = (project in file("."))
     addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.4.3" cross CrossVersion.full),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
   )
-  .dependsOn(caravan, jigsaw, nucleusrv)
+  .dependsOn(caravan, jigsaw, nucleusrv, BabyKyberAcceleratorCHISEL)
