@@ -2,7 +2,7 @@ import chisel3._
 import chisel3.experimental.Analog
 import chisel3.stage.ChiselStage
 
-import nucleusrv.components.Core
+import nucleusrv.components.{Core, Configs}
 
 import caravan.bus.common._
 import caravan.bus.tilelink._
@@ -67,30 +67,86 @@ class GeneratorNew (programFile: Option[String],
     // }
 
 
-    private def setupBus(busType:String): Unit = {
-        if (busType == "wb"){
-            // implicit val config: WishboneConfig = WishboneConfig(32,32)         // keeping statis 32 address width and 32 data width for now
-            setupWishboneBus()
-        }
+    private def setupBus(busType:String): Unit = busType match {
+        // if (busType == "wb"){
+        //     // implicit val config: WishboneConfig = WishboneConfig(32,32)         // keeping statis 32 address width and 32 data width for now
+        //     setupWishboneBus()
+        // }
+        case "wb" => setupWishboneBus()
+        case _    => throw new IllegalArgumentException(s"Unsupported bus type: $busType")
+
     }
 
     private def setupWishboneBus(): Unit = {
         implicit val config:WishboneConfig = WishboneConfig(32,32)
 
         // connect GPIO
-        setupPeripheral[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDevice]("GPIO", () => new Gpio(new WBRequest(), new WBResponse()), connectGPIO, connectDevice[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDevice], () => new WishboneDevice )
+        setupPeripheral[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO](
+            "GPIO",                                                                             // name
+            () => new Gpio(new WBRequest(), new WBResponse()),                                  // createPeripheral
+            connectGPIO,                                                                        // connectPeripheral
+            connectDevice[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDeviceIO],  // connectDevice
+            () => new WishboneDevice                                                            // busDevice
+        )
+
+        // instantiate core
+        implicit val coreconfig = Configs()
+        val core = Module(new Core())  
+        core.io.stall := false.B
 
 
+        val bus_host = Module(new WishboneHost())
+        // val bus_slave = Module(new WishboneDevice())
+
+        val imem_adapter = Module(new WishboneAdapter)
+        val imem = Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
+
+        bus_host.io.reqIn   <> core.io.dmemReq
+        bus_host.io.rspOut  <> core.io.dmemRsp
+        // bus_slave.io.reqOut <> 
+
+        imem_adapter.io.reqIn   <> core.io.imemReq
+        imem_adapter.io.rspOut  <> core.io.imemRsp
+        imem_adapter.io.reqOut  <> imem.io.req
+        imem_adapter.io.rspIn   <> imem.io.rsp
+
+        // setup switch
+        val devices = addressMap.getDevices
+        val switch = Module(new Switch1toN(new WishboneMaster(), new WishboneSlave(), devices.size))
+
+        switch.io.hostIn    <> bus_host.io.wbMasterTransmitter
+        switch.io.hostOut   <> bus_host.io.wbSlaveReceiver
+
+        for (i <- 0 until devices.size)
+        {
+            switch.io.devIn(devices(i)._2.litValue().toInt)     <> devices(i)._1.asInstanceOf[WishboneDevice].io.wbSlaveTransmitter
+            switch.io.devOut(devices(i)._2.litValue().toInt)    <> devices(i)._1.asInstanceOf[WishboneDevice].io.wbMasterReceiver
+        }
+
+        // error device
+        val wbError = Module(new WishboneErr)
+
+        switch.io.devIn(devices.size)   <> wbError.io.wbSlaveTransmitter
+        switch.io.devOut(devices.size)  <> wbError.io.wbMasterReceiver
+
+        switch.io.devSel    := BusDecoder.decode(bus_host.io.wbMasterTransmitter.bits.adr, addressMap)
 
     }
 
     // Generic method to setup a peripheral based on configuration
-    private def setupPeripheral[T <:AbstrRequest, R <: AbstrResponse, P <: Gpio[T,R], B <: DeviceAdapter](name: String, createPeripheral: () => P, connectPeripheral: P => Unit, connectDevice: (P,B) => Unit, busDevice: () => B): Unit = {
+    private def setupPeripheral[T <:AbstrRequest, R <: AbstrResponse, P <: Gpio[T,R], B <: DeviceAdapter, I<:DeviceAdapterIO]
+    (
+        name: String, 
+        createPeripheral: () => P, 
+        connectPeripheral: P => Unit, 
+        connectDevice: (P,I) => Unit, 
+        busDevice: () => B
+    ): Unit = {
         // if (configs(name)("is").asInstanceOf[Boolean]) {
         val peripheral = Module(createPeripheral())
         connectPeripheral(peripheral)
         val bus = Module(busDevice())
-        connectDevice(peripheral, bus)
+        connectDevice(peripheral, bus.io.asInstanceOf[I])
         addressMap.addDevice(
             Peripherals.get(name),
             configs(name)("baseAddr").asInstanceOf[String].U(32.W),
@@ -100,11 +156,15 @@ class GeneratorNew (programFile: Option[String],
         // }
     }
 
-    private def connectDevice[T <:AbstrRequest, R <: AbstrResponse, P <: Gpio[T,R], B <: WishboneDevice](device:P,bus:B): Unit = {
+    private def connectDevice[T <:AbstrRequest, R <: AbstrResponse, P <: Gpio[T,R], B <: DeviceAdapterIO]
+    (
+        device  :P,
+        bus     :B
+    ): Unit = {
         // val gen_peripheral = Module(bus)
 
-        bus.io.reqOut <> device.io.req
-        bus.io.rspIn  <> device.io.rsp
+        bus.reqOut <> device.io.req
+        bus.rspIn  <> device.io.rsp
 
         // bus
     }
