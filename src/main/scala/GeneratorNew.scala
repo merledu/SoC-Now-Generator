@@ -9,7 +9,7 @@ import caravan.bus.tilelink._
 import caravan.bus.wishbone._
 
 import jigsaw.fpga.boards.artyA7._
-import jigsaw.rams.fpga.BlockRam
+import jigsaw.rams.fpga.{BlockRam, BlockRamWithMasking}
 import jigsaw.peripherals.gpio._
 import jigsaw.peripherals.spiflash._
 import jigsaw.peripherals.spi._
@@ -17,6 +17,7 @@ import jigsaw.peripherals.UART._
 import jigsaw.peripherals.timer._
 import jigsaw.peripherals.i2c._
 import java.util.Timer
+import jigsaw.peripherals.common._
 
 class GeneratornewIOs(configs:Map[Any, Map[Any, Any]], fpga:Boolean = false) extends Bundle
 {
@@ -59,34 +60,121 @@ class GeneratorNew (programFile: Option[String],
 {
     val io = IO(new GeneratornewIOs(configs))
 
-    // def this() = {
-    //     this()
     val addressMap = new AddressMap
     Peripherals.addValuesFromJson("peripherals.json")
     setupBus("wb")
-    // }
 
+    
 
     private def setupBus(busType:String): Unit = busType match {
-        // if (busType == "wb"){
-        //     // implicit val config: WishboneConfig = WishboneConfig(32,32)         // keeping statis 32 address width and 32 data width for now
-        //     setupWishboneBus()
-        // }
+
         case "wb" => setupWishboneBus()
+        // case "tl" => setupTilelinkBus()
         case _    => throw new IllegalArgumentException(s"Unsupported bus type: $busType")
 
     }
 
     private def setupWishboneBus(): Unit = {
-        implicit val config:WishboneConfig = WishboneConfig(32,32)
+        implicit val config :WishboneConfig = WishboneConfig(32,32)
+
+
+        // setupPeripheral[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO](
+        //     "DCCM",
+        //     () => BlockRam.createMaskableRAM(bus=config, rows=1024),
+        //     () => None,
+        //     connectDevice[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDeviceIO],
+        //     () => new WishboneDevice
+        // )
+
+        // connect DCCM
+        setupPeripheral[WBRequest, WBResponse, BlockRamWithMasking[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+            "DCCM",
+            () => new BlockRamWithMasking(new WBRequest, new WBResponse, 1024), //BlockRam.createMaskableRAM(bus=config, rows=1024),
+            P => (),
+            (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
+            connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[WBRequest, WBResponse]], 
+                bus.asInstanceOf[WishboneDeviceIO]
+            ),
+            () => new WishboneDevice
+        )
 
         // connect GPIO
-        setupPeripheral[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO](
-            "GPIO",                                                                             // name
-            () => new Gpio(new WBRequest(), new WBResponse()),                                  // createPeripheral
-            connectGPIO,                                                                        // connectPeripheral
-            connectDevice[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDeviceIO],  // connectDevice
-            () => new WishboneDevice                                                            // busDevice
+        setupPeripheral[WBRequest, WBResponse, Gpio[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+            "GPIO",                                                                                 // name
+            () => new Gpio(new WBRequest(), new WBResponse()),                                      // createPeripheral
+            connectGPIO _,                                                                            // connectPeripheral
+            (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
+            connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[WBRequest, WBResponse]], 
+                bus.asInstanceOf[WishboneDeviceIO]
+            ),   // connectDevice
+            () => new WishboneDevice                                                                // busDevice
+        )
+
+        // connect SPI
+        setupPeripheral[WBRequest, WBResponse, Spi[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+            "SPI",
+            () => new Spi(new WBRequest(), new WBResponse()),
+            connectSPI _,
+            (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
+            connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[WBRequest, WBResponse]], 
+                bus.asInstanceOf[WishboneDeviceIO]
+            ),
+            () => new WishboneDevice
+        )
+
+        // connect UART
+        setupPeripheral[WBRequest, WBResponse, Uart[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+            "UART",
+            () => new Uart(new WBRequest(), new WBResponse()),
+            connectUART _,
+            (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
+            connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[WBRequest, WBResponse]], 
+                bus.asInstanceOf[WishboneDeviceIO]
+            ),
+            () => new WishboneDevice
+        )
+
+        // connect TIMER
+        setupPeripheral[WBRequest, WBResponse, jigsaw.peripherals.timer.Timer[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+            "TIMER",
+            () => new jigsaw.peripherals.timer.Timer(new WBRequest(), new WBResponse()),
+            connectTIMER _,
+            (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
+            connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[WBRequest, WBResponse]], 
+                bus.asInstanceOf[WishboneDeviceIO]
+            ),
+            () => new WishboneDevice
+        )
+
+        // connect SPI-Flash
+        setupPeripheral[WBRequest, WBResponse, SpiFlash[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+            "SPIF",
+            () => new SpiFlash(new WBRequest(), new WBResponse()),
+            connectSPIF _,
+            (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
+            connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[WBRequest, WBResponse]], 
+                bus.asInstanceOf[WishboneDeviceIO]
+            ),
+            () => new WishboneDevice
+        )
+
+        // connect I2C
+        setupPeripheral[WBRequest, WBResponse, I2c[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+            "I2C",
+            () => new I2c(new WBRequest(), new WBResponse()),
+            connectI2C _,
+            (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
+            connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[WBRequest, WBResponse]], 
+                bus.asInstanceOf[WishboneDeviceIO]
+            ),
+            () => new WishboneDevice
         )
 
         // instantiate core
@@ -96,14 +184,12 @@ class GeneratorNew (programFile: Option[String],
 
 
         val bus_host = Module(new WishboneHost())
-        // val bus_slave = Module(new WishboneDevice())
-
-        val imem_adapter = Module(new WishboneAdapter)
-        val imem = Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
 
         bus_host.io.reqIn   <> core.io.dmemReq
         bus_host.io.rspOut  <> core.io.dmemRsp
-        // bus_slave.io.reqOut <> 
+
+        val imem_adapter = Module(new WishboneAdapter)
+        val imem = Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
 
         imem_adapter.io.reqIn   <> core.io.imemReq
         imem_adapter.io.rspOut  <> core.io.imemRsp
@@ -112,6 +198,7 @@ class GeneratorNew (programFile: Option[String],
 
         // setup switch
         val devices = addressMap.getDevices
+        println(devices)
         val switch = Module(new Switch1toN(new WishboneMaster(), new WishboneSlave(), devices.size))
 
         switch.io.hostIn    <> bus_host.io.wbMasterTransmitter
@@ -119,6 +206,8 @@ class GeneratorNew (programFile: Option[String],
 
         for (i <- 0 until devices.size)
         {
+            println(devices(i)._2.litValue().toInt)
+            println(devices(i)._1.asInstanceOf[WishboneDevice])
             switch.io.devIn(devices(i)._2.litValue().toInt)     <> devices(i)._1.asInstanceOf[WishboneDevice].io.wbSlaveTransmitter
             switch.io.devOut(devices(i)._2.litValue().toInt)    <> devices(i)._1.asInstanceOf[WishboneDevice].io.wbMasterReceiver
         }
@@ -128,45 +217,42 @@ class GeneratorNew (programFile: Option[String],
 
         switch.io.devIn(devices.size)   <> wbError.io.wbSlaveTransmitter
         switch.io.devOut(devices.size)  <> wbError.io.wbMasterReceiver
+        println(addressMap.getMap())
 
         switch.io.devSel    := BusDecoder.decode(bus_host.io.wbMasterTransmitter.bits.adr, addressMap)
 
     }
 
     // Generic method to setup a peripheral based on configuration
-    private def setupPeripheral[T <:AbstrRequest, R <: AbstrResponse, P <: Gpio[T,R], B <: DeviceAdapter, I<:DeviceAdapterIO]
+    private def setupPeripheral[T <:AbstrRequest, R <: AbstrResponse, P <: AbstractDevice, B <: DeviceAdapter, I<:DeviceAdapterIO, O<:AbstractDeviceIO[T,R]]
     (
         name: String, 
         createPeripheral: () => P, 
         connectPeripheral: P => Unit, 
-        connectDevice: (P,I) => Unit, 
+        connectDevice: (O,I) => Unit, 
         busDevice: () => B
     ): Unit = {
-        // if (configs(name)("is").asInstanceOf[Boolean]) {
-        val peripheral = Module(createPeripheral())
-        connectPeripheral(peripheral)
-        val bus = Module(busDevice())
-        connectDevice(peripheral, bus.io.asInstanceOf[I])
-        addressMap.addDevice(
-            Peripherals.get(name),
-            configs(name)("baseAddr").asInstanceOf[String].U(32.W),
-            configs(name)("mask").asInstanceOf[String].U(32.W),
-            bus
-        )
-        // }
+        if (configs(name)("is").asInstanceOf[Boolean]) {
+            val peripheral = Module(createPeripheral())
+            connectPeripheral(peripheral)
+            val bus = Module(busDevice())
+            connectDevice(peripheral.io.asInstanceOf[O], bus.io.asInstanceOf[I])
+            addressMap.addDevice(
+                Peripherals.get(name),
+                configs(name)("baseAddr").asInstanceOf[String].U(32.W),
+                configs(name)("mask").asInstanceOf[String].U(32.W),
+                bus
+            )
+        }
     }
 
-    private def connectDevice[T <:AbstrRequest, R <: AbstrResponse, P <: Gpio[T,R], B <: DeviceAdapterIO]
+    private def connectDevice[T <:AbstrRequest, R <: AbstrResponse, P <: AbstractDeviceIO[T,R], B <: DeviceAdapterIO]
     (
         device  :P,
         bus     :B
     ): Unit = {
-        // val gen_peripheral = Module(bus)
-
-        bus.reqOut <> device.io.req
-        bus.rspIn  <> device.io.rsp
-
-        // bus
+        bus.reqOut <> device.req
+        bus.rspIn  <> device.rsp
     }
 
     // Specific method to connect GPIO
@@ -177,6 +263,42 @@ class GeneratorNew (programFile: Option[String],
         gpio.io.cio_gpio_i  := io.gpio_i.get
     }
 
+    // Specific method to connect SPI
+    private def connectSPI[A <: AbstrRequest, B <: AbstrResponse](spi: Spi[A,B]): Unit = {
+        io.spi_cs_n.get := spi.io.cs_n
+        io.spi_sclk.get := spi.io.sclk
+        io.spi_mosi.get := spi.io.mosi
+        spi.io.miso     := io.spi_miso.get
+    }
+
+    // Specific method to connect UART
+    private def connectUART[A <: AbstrRequest, B <: AbstrResponse](uart: Uart[A,B]): Unit = {
+        uart.io.cio_uart_rx_i := io.cio_uart_rx_i.get
+        io.cio_uart_tx_o.get := uart.io.cio_uart_tx_o
+        io.cio_uart_intr_tx_o.get := uart.io.cio_uart_intr_tx_o 
+    }
+
+    // Speciifc method to connect TIMER
+    private def connectTIMER[A <: AbstrRequest, B <: AbstrResponse](timer: jigsaw.peripherals.timer.Timer[A,B]): Unit = {
+        io.timer_intr_cmp.get := timer.io.cio_timer_intr_cmp
+        io.timer_intr_ovf.get := timer.io.cio_timer_intr_ovf
+    }
+
+    // Specific method to connect SPI FLASH
+    private def connectSPIF[A <: AbstrRequest, B <: AbstrResponse](spi_flash: SpiFlash[A,B]): Unit = {
+        io.spi_flash_cs_n.get := spi_flash.io.cs_n
+        io.spi_flash_sclk.get := spi_flash.io.sclk
+        io.spi_flash_mosi.get := spi_flash.io.mosi
+        spi_flash.io.miso := io.spi_flash_miso.get
+    }
+
+    // Specific method to connect I2C
+    private def connectI2C[A <: AbstrRequest, B <: AbstrResponse](i2c: I2c[A,B]): Unit = {
+        i2c.io.cio_i2c_sda_in := io.i2c_sda_in.get
+        io.i2c_sda.get := i2c.io.cio_i2c_sda
+        io.i2c_scl.get := i2c.io.cio_i2c_scl
+        io.i2c_intr.get := i2c.io.cio_i2c_intr
+    }
     
 
 }
