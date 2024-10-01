@@ -9,7 +9,7 @@ import caravan.bus.tilelink._
 import caravan.bus.wishbone._
 
 import jigsaw.fpga.boards.artyA7._
-import jigsaw.rams.fpga.{BlockRam, BlockRamWithMasking}
+import jigsaw.rams.fpga._
 import jigsaw.peripherals.gpio._
 import jigsaw.peripherals.spiflash._
 import jigsaw.peripherals.spi._
@@ -87,9 +87,9 @@ class GeneratorNew (programFile: Option[String],
         // )
 
         // connect DCCM
-        setupPeripheral[WBRequest, WBResponse, BlockRamWithMasking[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
+        setupPeripheral[WBRequest, WBResponse, jigsaw.rams.fpga.BlockRamWithMasking[WBRequest, WBResponse], WishboneDevice, WishboneDeviceIO, AbstractDeviceIO[WBRequest, WBResponse]](
             "DCCM",
-            () => new BlockRamWithMasking(new WBRequest, new WBResponse, 1024), //BlockRam.createMaskableRAM(bus=config, rows=1024),
+            () => new jigsaw.rams.fpga.BlockRamWithMasking(new WBRequest, new WBResponse, 1024), //BlockRam.createMaskableRAM(bus=config, rows=1024),
             P => (),
             (device: AbstractDeviceIO[WBRequest, WBResponse], bus: WishboneDeviceIO) => 
             connectDevice[WBRequest, WBResponse, AbstractDeviceIO[WBRequest, WBResponse], WishboneDeviceIO](
@@ -189,7 +189,7 @@ class GeneratorNew (programFile: Option[String],
         bus_host.io.rspOut  <> core.io.dmemRsp
 
         val imem_adapter = Module(new WishboneAdapter)
-        val imem = Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
+        val imem = Module(new BlockRamWithoutMasking(new WBRequest, new WBResponse, programFile, 1024)) //Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
 
         imem_adapter.io.reqIn   <> core.io.imemReq
         imem_adapter.io.rspOut  <> core.io.imemRsp
@@ -224,7 +224,7 @@ class GeneratorNew (programFile: Option[String],
     }
 
     // Generic method to setup a peripheral based on configuration
-    private def setupPeripheral[T <:AbstrRequest, R <: AbstrResponse, P <: AbstractDevice, B <: DeviceAdapter, I<:DeviceAdapterIO, O<:AbstractDeviceIO[T,R]]
+    private def setupPeripheral[T <:AbstrRequest, R <: AbstrResponse, P <: AbstractDevice[T,R], B <: DeviceAdapter, I<:DeviceAdapterIO, O<:AbstractDeviceIO[T,R]]
     (
         name: String, 
         createPeripheral: () => P, 
