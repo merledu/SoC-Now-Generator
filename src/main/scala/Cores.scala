@@ -4,7 +4,7 @@ import chisel3.stage.ChiselStage
 
 import caravan.bus.common._
 
-import nucleusrv.components.{Core,CoreIO, Configs}
+import nucleusrv.components.{Core, Configs}
 
 // abstract class AbstractCoreIO extends CoreIO
 
