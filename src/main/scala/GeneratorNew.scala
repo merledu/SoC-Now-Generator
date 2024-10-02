@@ -178,48 +178,24 @@ class GeneratorNew (programFile: Option[String],
         )
 
         // instantiate core
-        implicit val coreconfig = Configs()
-        val core = Module(new Core())  
-        core.io.stall := false.B
+        val core = connectNRV
 
+        // connecting imem to core
+        connectImemToCore[WBRequest, WBResponse, BlockRamWithoutMasking[WBRequest, WBResponse]](
+            programFile,
+            1024,
+            (pf, rows) => new BlockRamWithoutMasking(new WBRequest, new WBResponse, pf, rows),
+            core,
+            () => new WishboneAdapter
+        )
 
-        val bus_host = Module(new WishboneHost())
-
-        bus_host.io.reqIn   <> core.io.dmemReq
-        bus_host.io.rspOut  <> core.io.dmemRsp
-
-        val imem_adapter = Module(new WishboneAdapter)
-        val imem = Module(new BlockRamWithoutMasking(new WBRequest, new WBResponse, programFile, 1024)) //Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
-
-        imem_adapter.io.reqIn   <> core.io.imemReq
-        imem_adapter.io.rspOut  <> core.io.imemRsp
-        imem_adapter.io.reqOut  <> imem.io.req
-        imem_adapter.io.rspIn   <> imem.io.rsp
-
-        // setup switch
-        val devices = addressMap.getDevices
-        println(devices)
-        val switch = Module(new Switch1toN(new WishboneMaster(), new WishboneSlave(), devices.size))
-
-        switch.io.hostIn    <> bus_host.io.wbMasterTransmitter
-        switch.io.hostOut   <> bus_host.io.wbSlaveReceiver
-
-        for (i <- 0 until devices.size)
-        {
-            println(devices(i)._2.litValue().toInt)
-            println(devices(i)._1.asInstanceOf[WishboneDevice])
-            switch.io.devIn(devices(i)._2.litValue().toInt)     <> devices(i)._1.asInstanceOf[WishboneDevice].io.wbSlaveTransmitter
-            switch.io.devOut(devices(i)._2.litValue().toInt)    <> devices(i)._1.asInstanceOf[WishboneDevice].io.wbMasterReceiver
-        }
-
-        // error device
-        val wbError = Module(new WishboneErr)
-
-        switch.io.devIn(devices.size)   <> wbError.io.wbSlaveTransmitter
-        switch.io.devOut(devices.size)  <> wbError.io.wbMasterReceiver
-        println(addressMap.getMap())
-
-        switch.io.devSel    := BusDecoder.decode(bus_host.io.wbMasterTransmitter.bits.adr, addressMap)
+        // connecting Switch w. Core and selected Devices
+        connectCrossbarSwitch[WBRequest, WBResponse, WishboneMaster, WishboneSlave, WishboneHost, WishboneDevice, Switch1toN[WishboneMaster, WishboneSlave], WishboneErr](
+            () => new WishboneHost(),
+            core,
+            (devSize) => new Switch1toN(new WishboneMaster, new WishboneSlave, devSize),
+            () => new WishboneErr
+        )
 
     }
 
@@ -298,6 +274,69 @@ class GeneratorNew (programFile: Option[String],
         io.i2c_sda.get := i2c.io.cio_i2c_sda
         io.i2c_scl.get := i2c.io.cio_i2c_scl
         io.i2c_intr.get := i2c.io.cio_i2c_intr
+    }
+
+    // private method for NRV // TODO: Make more generic
+    private def connectNRV: NRV = {
+        implicit val coreconfig = Configs()
+        val core = Module(new NRV)
+        core.io.stall := false.B
+        core
+    }
+
+    private def connectImemToCore[T <: AbstrRequest, R <: AbstrResponse, D <: AbstractDevice[T,R]]
+    (
+        pf: Option[String],
+        rw: Int,
+        createImem: (Option[String],Int) => D,
+        core: NRV,
+        createAdapter: () => BusAdapter
+    ):Unit = {
+        val imem_adapter = Module(createAdapter()) //Module(new WishboneAdapter)
+        val imem = Module(createImem(pf,rw)) //Module(new BlockRamWithoutMasking(new WBRequest, new WBResponse, programFile, 1024)) //Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
+
+        imem_adapter.io.reqIn   <> core.io.imemReq
+        imem_adapter.io.rspOut  <> core.io.imemRsp
+        imem_adapter.io.reqOut  <> imem.io.req
+        imem_adapter.io.rspIn   <> imem.io.rsp
+    }
+
+    private def connectCrossbarSwitch[T <: AbstrRequest, R <: AbstrResponse, M <: BusHost, S <: BusDevice, H <: HostAdapter, D <: DeviceAdapter, SW <: Switch1toN[M,S], E <: ErrorDevice](
+        createHost: () => H,
+        core: NRV,
+        createSwitch: (Int) => SW,
+        createError: () => E
+    ) = {
+
+        val bus_host = Module(createHost())
+
+        bus_host.io.reqIn   <> core.io.dmemReq
+        bus_host.io.rspOut  <> core.io.dmemRsp
+
+        // setup switch
+        val devices = addressMap.getDevices
+        println(devices)
+        val switch = Module(createSwitch(devices.size))
+
+        switch.io.hostIn    <> bus_host.io.masterTransmitter
+        switch.io.hostOut   <> bus_host.io.slaveReceiver
+
+        for (i <- 0 until devices.size)
+        {
+            println(devices(i)._2.litValue().toInt)
+            println(devices(i)._1.asInstanceOf[D])
+            switch.io.devIn(devices(i)._2.litValue().toInt)     <> devices(i)._1.asInstanceOf[D].io.slaveTransmitter
+            switch.io.devOut(devices(i)._2.litValue().toInt)    <> devices(i)._1.asInstanceOf[D].io.masterReceiver
+        }
+
+        // error device
+        val wbError = Module(createError())
+
+        switch.io.devIn(devices.size)   <> wbError.io.slaveTransmitter
+        switch.io.devOut(devices.size)  <> wbError.io.masterReceiver
+        println(addressMap.getMap())
+
+        switch.io.devSel    := BusDecoder.decode(bus_host.getAddressPin, addressMap)
     }
     
 
