@@ -6,8 +6,8 @@
 	url = https://github.com/merledu/cachefy
 [submodule "caravan"]
 	path = caravan
-	url = https://github.com/shahzaibk23/caravan
+	url = https://github.com/merledu/caravan
 [submodule "jigsaw"]
 	path = jigsaw
-	url = https://github.com/talha-ahmed-1/jigsaw
+	url = https://github.com/merledu/jigsaw
 	branch = independent
