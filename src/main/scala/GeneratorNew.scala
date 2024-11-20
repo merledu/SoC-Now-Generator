@@ -62,15 +62,131 @@ class GeneratorNew (programFile: Option[String],
 
     val addressMap = new AddressMap
     Peripherals.addValuesFromJson("peripherals.json")
-    setupBus("wb")
+    setupBus("tl")
 
     
 
     private def setupBus(busType:String): Unit = busType match {
 
         case "wb" => setupWishboneBus()
-        // case "tl" => setupTilelinkBus()
+        case "tl" => setupTilelinkBus()
         case _    => throw new IllegalArgumentException(s"Unsupported bus type: $busType")
+
+    }
+
+    private def setupTilelinkBus(): Unit = {
+        implicit val config: TilelinkConfig = TilelinkConfig()
+
+        // connect DCCM
+        setupPeripheral[TLRequest, TLResponse, jigsaw.rams.fpga.BlockRamWithMasking[TLRequest, TLResponse], TilelinkDevice, TilelinkDeviceIO, AbstractDeviceIO[TLRequest, TLResponse]](
+            "DCCM",
+            () => new jigsaw.rams.fpga.BlockRamWithMasking(new TLRequest, new TLResponse, 1024), //BlockRam.createMaskableRAM(bus=config, rows=1024),
+            P => (),
+            (device: AbstractDeviceIO[TLRequest, TLResponse], bus: TilelinkDeviceIO) => 
+            connectDevice[TLRequest, TLResponse, AbstractDeviceIO[TLRequest, TLResponse], TilelinkDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[TLRequest, TLResponse]], 
+                bus.asInstanceOf[TilelinkDeviceIO]
+            ),
+            () => new TilelinkDevice
+        )
+
+        // connect GPIO
+        setupPeripheral[TLRequest, TLResponse, Gpio[TLRequest, TLResponse], TilelinkDevice, TilelinkDeviceIO, AbstractDeviceIO[TLRequest, TLResponse]](
+            "GPIO",                                                                                 // name
+            () => new Gpio(new TLRequest(), new TLResponse()),                                      // createPeripheral
+            connectGPIO _,                                                                            // connectPeripheral
+            (device: AbstractDeviceIO[TLRequest, TLResponse], bus: TilelinkDeviceIO) => 
+            connectDevice[TLRequest, TLResponse, AbstractDeviceIO[TLRequest, TLResponse], TilelinkDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[TLRequest, TLResponse]], 
+                bus.asInstanceOf[TilelinkDeviceIO]
+            ),   // connectDevice
+            () => new TilelinkDevice                                                                // busDevice
+        )
+
+        // connect SPI
+        setupPeripheral[TLRequest, TLResponse, Spi[TLRequest, TLResponse], TilelinkDevice, TilelinkDeviceIO, AbstractDeviceIO[TLRequest, TLResponse]](
+            "SPI",
+            () => new Spi(new TLRequest(), new TLResponse()),
+            connectSPI _,
+            (device: AbstractDeviceIO[TLRequest, TLResponse], bus: TilelinkDeviceIO) => 
+            connectDevice[TLRequest, TLResponse, AbstractDeviceIO[TLRequest, TLResponse], TilelinkDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[TLRequest, TLResponse]], 
+                bus.asInstanceOf[TilelinkDeviceIO]
+            ),
+            () => new TilelinkDevice
+        )
+
+        // connect UART
+        setupPeripheral[TLRequest, TLResponse, Uart[TLRequest, TLResponse], TilelinkDevice, TilelinkDeviceIO, AbstractDeviceIO[TLRequest, TLResponse]](
+            "UART",
+            () => new Uart(new TLRequest(), new TLResponse()),
+            connectUART _,
+            (device: AbstractDeviceIO[TLRequest, TLResponse], bus: TilelinkDeviceIO) => 
+            connectDevice[TLRequest, TLResponse, AbstractDeviceIO[TLRequest, TLResponse], TilelinkDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[TLRequest, TLResponse]], 
+                bus.asInstanceOf[TilelinkDeviceIO]
+            ),
+            () => new TilelinkDevice
+        )
+
+        // connect TIMER
+        setupPeripheral[TLRequest, TLResponse, jigsaw.peripherals.timer.Timer[TLRequest, TLResponse], TilelinkDevice, TilelinkDeviceIO, AbstractDeviceIO[TLRequest, TLResponse]](
+            "TIMER",
+            () => new jigsaw.peripherals.timer.Timer(new TLRequest(), new TLResponse()),
+            connectTIMER _,
+            (device: AbstractDeviceIO[TLRequest, TLResponse], bus: TilelinkDeviceIO) => 
+            connectDevice[TLRequest, TLResponse, AbstractDeviceIO[TLRequest, TLResponse], TilelinkDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[TLRequest, TLResponse]], 
+                bus.asInstanceOf[TilelinkDeviceIO]
+            ),
+            () => new TilelinkDevice
+        )
+
+        // connect SPI-Flash
+        setupPeripheral[TLRequest, TLResponse, SpiFlash[TLRequest, TLResponse], TilelinkDevice, TilelinkDeviceIO, AbstractDeviceIO[TLRequest, TLResponse]](
+            "SPIF",
+            () => new SpiFlash(new TLRequest(), new TLResponse()),
+            connectSPIF _,
+            (device: AbstractDeviceIO[TLRequest, TLResponse], bus: TilelinkDeviceIO) => 
+            connectDevice[TLRequest, TLResponse, AbstractDeviceIO[TLRequest, TLResponse], TilelinkDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[TLRequest, TLResponse]], 
+                bus.asInstanceOf[TilelinkDeviceIO]
+            ),
+            () => new TilelinkDevice
+        )
+
+        // connect I2C
+        setupPeripheral[TLRequest, TLResponse, I2c[TLRequest, TLResponse], TilelinkDevice, TilelinkDeviceIO, AbstractDeviceIO[TLRequest, TLResponse]](
+            "I2C",
+            () => new I2c(new TLRequest(), new TLResponse()),
+            connectI2C _,
+            (device: AbstractDeviceIO[TLRequest, TLResponse], bus: TilelinkDeviceIO) => 
+            connectDevice[TLRequest, TLResponse, AbstractDeviceIO[TLRequest, TLResponse], TilelinkDeviceIO](
+                device.asInstanceOf[AbstractDeviceIO[TLRequest, TLResponse]], 
+                bus.asInstanceOf[TilelinkDeviceIO]
+            ),
+            () => new TilelinkDevice
+        )
+
+        // instantiate core
+        val core = connectNRV
+
+        // connecting imem to core
+        connectImemToCore[TLRequest, TLResponse, BlockRamWithoutMasking[TLRequest, TLResponse]](
+            programFile,
+            1024,
+            (pf, rows) => new BlockRamWithoutMasking(new TLRequest, new TLResponse, pf, rows),
+            core,
+            () => new TilelinkAdapter
+        )
+
+        // connecting Switch w. Core and selected Devices
+        connectCrossbarSwitch[TLRequest, TLResponse, TilelinkMaster, TilelinkSlave, TilelinkHost, TilelinkDevice, Switch1toN[TilelinkMaster, TilelinkSlave], TilelinkError](
+            () => new TilelinkHost(),
+            core,
+            (devSize) => new Switch1toN(new TilelinkMaster, new TilelinkSlave, devSize),
+            () => new TilelinkError
+        )
 
     }
 
