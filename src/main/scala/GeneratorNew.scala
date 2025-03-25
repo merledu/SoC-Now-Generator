@@ -62,8 +62,12 @@ class GeneratorNew (programFile: Option[String],
 
     val addressMap = new AddressMap
     Peripherals.addValuesFromJson("peripherals.json")
-    setupBus("tl")
 
+    if (configs("TL")("is").asInstanceOf[Boolean]) {
+        setupBus("tl")
+    } else {
+        setupBus("wb")
+    }
     
 
     private def setupBus(busType:String): Unit = busType match {
@@ -394,7 +398,10 @@ class GeneratorNew (programFile: Option[String],
 
     // private method for NRV // TODO: Make more generic
     private def connectNRV: NRV = {
-        implicit val coreconfig = Configs()
+        implicit val coreconfig = Configs(
+            M = configs("M")("is").asInstanceOf[Boolean],
+            C = configs("C")("is").asInstanceOf[Boolean]
+        )
         val core = Module(new NRV)
         core.io.stall := false.B
         core
@@ -458,105 +465,12 @@ class GeneratorNew (programFile: Option[String],
 
 }
 
-/*
-class Generator(programFile: Option[String],
-                 configs:Map[Any, Map[Any, Any]]) extends Module
-{
-    val n = configs("GPIO")("n").asInstanceOf[Int]
-
-    val io = IO(new GeneratorIOs(configs))
-
-    implicit val config: BusConfig = if (configs("WB")("is").asInstanceOf[Boolean]) WishboneConfig(32, 32)
-                          else if (configs("TL")("is").asInstanceOf[Boolean]) TilelinkConfig(10, 32)
-                          else TilelinkConfig(10, 32)
-
-    def createHost(): BusHost = if (configs("WB")("is").asInstanceOf[Boolean]) Module(new WishboneHost())
-                     else Module(new TilelinkHost())
-
-    def createSlave(): BusDevice = if (configs("WB")("is").asInstanceOf[Boolean]) Module(new WishboneDevice())
-                     else Module(new TilelinkDevice())
-
-    val gen_imem_host = createHost()
-    val gen_imem_slave = createSlave()
-    val gen_dmem_host = createHost()
-    val gen_dmem_slave = createSlave()
-
-    val addressMap = new AddressMap
-
-    Peripherals.addValuesFromJson("config.json")
-
-    addressMap.addDevice( Peripherals.get("DCCM"), configs("DCCM")("baseAddr").asInstanceOf[String].U(32.W), configs("GPIO")("mask").asInstanceOf[String].U(32.W), gen_dmem_slave)
-
-    
-
-    val imem = Module(BlockRam.createNonMaskableRAM(programFile, bus=config, rows=1024))
-    val dmem = Module(BlockRam.createMaskableRAM(bus=config, rows=1024))
-
-    val busErr = Module(if (configs("WB")("is").asInstanceOf[Boolean]) new WishboneErr() else new TilelinkError())
-    val core = Module(new Core())
-
-    val devices = addressMap.getDevices
-
-    val switch = Module(
-        new Switch1toN(
-            if (configs("WB")("is").asInstanceOf[Boolean]) new WishboneMaster()
-            else new TilelinkMaster(),
-            if (configs("WB")("is").asInstanceOf[Boolean]) new WishboneSlave()
-            else new TilelinkSlave(),
-            devices.size
-        )
-    )
-
-    // wb <-> Core (fetch)
-    gen_imem_host.io.reqIn <> core.io.imemReq
-    core.io.imemRsp <> gen_imem_host.io.rspOut
-    gen_imem_slave.io.reqOut <> imem.io.req
-    gen_imem_slave.io.rspIn <> imem.io.rsp
-
-    // wb <-> wb (fetch)
-    gen_imem_host.io.wbMasterTransmitter <> gen_imem_slave.io.wbMasterReceiver
-    gen_imem_slave.io.wbSlaveTransmitter <> gen_imem_host.io
-        gen_imem_host.io.wbSlaveReceiver
-
-    // wb <-> Core (load/store)
-    gen_dmem_host.io.reqIn <> core.io.dmemReq
-    core.io.dmemRsp <> gen_dmem_host.io.rspOut
-    gen_dmem_slave.io.reqOut <> dmem.io.req
-    gen_dmem_slave.io.rspIn <> dmem.io.rsp
-
-    // wb <-> wb (load/store)
-    gen_dmem_host.io.wbMasterTransmitter <> gen_dmem_slave.io.wbMasterReceiver
-    gen_dmem_slave.io.wbSlaveTransmitter <> gen_dmem_host.io.wbSlaveReceiver
-
-    // Connecting all peripherals to the bus switch
-    for ((device, i) <- devices.zipWithIndex) {
-        switch.io.slaves(i).reqOut <> device.io.req
-        switch.io.slaves(i).rspIn <> device.io.rsp
-    }
-
-    // Connecting the bus switch to the master (e.g., core)
-    switch.io.master.reqIn <> core.io.dmemReq
-    core.io.dmemRsp <> switch.io.master.rspOut
-
-    // Connecting the bus switch to the error handler
-    busErr.io.master.reqIn <> switch.io.master.reqIn
-    busErr.io.master.rspOut <> switch.io.master.rspOut
-
-    // Assigning the reset vector
-    core.io.reset_vector := imem.io.addr // Assuming the reset vector is at the start of the instruction memory
-
-    // For debugging purposes
-    // printf("GPIO output: %d\n", io.gpio_o.get)
-    // printf("SPI CS: %b, SCLK: %b, MOSI: %b, MISO: %b\n", io.spi_cs_n.get, io.spi_sclk.get, io.spi_mosi.get, io.spi_miso.get)
-    // printf("UART RX: %b, TX: %b\n", io.cio_uart_rx_i.get, io.cio_uart_tx_o.get)
-}
-*/
 import spray.json._
 import DefaultJsonProtocol._
 
 object NewGeneratorDriver extends App {
     val programFile = if (args.length > 0) Some(args(0)) else None
-    val file = scala.io.Source.fromFile((os.pwd.toString)+"//src//main//scala//config.json").mkString
+    val file = scala.io.Source.fromFile("config.json").mkString
 
     val fileToJson = file.parseJson.convertTo[Map[String, JsValue]]
     val oneZero = fileToJson.map({case (a,b) => a -> {if (b == JsNumber(1)) true else false}})
@@ -575,6 +489,7 @@ object NewGeneratorDriver extends App {
                                            "TL"   -> Map("is" -> oneZero("tl")),
                                            "WB"   -> Map("is" -> oneZero("wb")),
                                            "TLC"   -> Map("is" -> oneZero("tlc")))
-
+                                           "M"    -> Map("is" -> oneZero("m")),
+                                           "C"    -> Map("is" -> oneZero("c")),
     (new ChiselStage).emitVerilog(new GeneratorNew(programFile, configs))
 }
