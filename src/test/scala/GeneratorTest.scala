@@ -11,10 +11,11 @@ class GeneratorTest extends FreeSpec with ChiselScalatestTester {
   import spray.json._
   import DefaultJsonProtocol._
   import sys.process._
+  import scala.io.Source
 
   // "python3 peripheralScript.py" !
 
-  val file = scala.io.Source.fromFile((os.pwd.toString)+"//src//main//scala//config.json").mkString
+  val file = Source.fromFile("config.json").getLines.mkString
 
   val fileToJson = file.parseJson.convertTo[Map[String, JsValue]]
   val oneZero = fileToJson.map({case (a,b) => a -> {if (b == JsNumber(1)) true else false}})
@@ -33,7 +34,10 @@ class GeneratorTest extends FreeSpec with ChiselScalatestTester {
                                            "M"    -> Map("is" -> oneZero("m")),
                                            "TL"   -> Map("is" -> oneZero("tl")),
                                            "WB"   -> Map("is" -> oneZero("wb")),
-                                           "TLC"   -> Map("is" -> oneZero("tlc")))
+                                           "TLC"   -> Map("is" -> oneZero("tlc")),
+                                           "M"    -> Map("is" -> oneZero("m")),
+                                           "C"    -> Map("is" -> oneZero("c")),
+)
 
   def getFile: Option[String] = {
     if (scalaTestContext.value.get.configMap.contains("memFile")) {
