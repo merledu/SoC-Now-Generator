@@ -2,11 +2,11 @@
     "peripherals": [
       {
         "name": "GPIO",
-        "value": 0
+        "value": 1
       },
       {
         "name": "DCCM",
-        "value": 1
+        "value": 0
       }
 
     ]

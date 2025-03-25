@@ -13,7 +13,7 @@ object PeripheralFactory extends App {
 
   def idCount():Map[String, Int] = {
     val basePath = (os.pwd.toString)
-    val jsonPath = basePath+"/src/main/scala/config.json"
+    val jsonPath = "config.json"
 
     val file = scala.io.Source.fromFile(jsonPath).mkString
 
